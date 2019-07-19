@@ -12,7 +12,6 @@ SAPPORO-web/SAPPORO-web/static/
 
 SAPPORO-fileserver/input_data/
 SAPPORO-fileserver/output_data/
-SAPPORO-fileserver/nginx/
 SAPPORO-fileserver/log/
 
 !.gitkeep
