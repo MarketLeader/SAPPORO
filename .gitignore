@@ -10,8 +10,8 @@
 /SAPPORO-web/SAPPORO-web/config/local_settings.py
 /SAPPORO-web/SAPPORO-web/static/
 
-/SAPPORO-fileserver/input_data/
-/SAPPORO-fileserver/output_data/
+/SAPPORO-fileserver/data/input_data/
+/SAPPORO-fileserver/data/output_data/
 /SAPPORO-fileserver/nginx/cache/
 /SAPPORO-fileserver/nginx/run/
 /SAPPORO-fileserver/log/nginx/
