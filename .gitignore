@@ -1,18 +1,20 @@
-SAPPORO-service/config/token_list.txt
-SAPPORO-service/config/uwsgi.sock
-SAPPORO-service/log/
-SAPPORO-service/run/
-SAPPORO-service/SAPPORO-service/app/local_config.py
+/SAPPORO-service/config/token_list.txt
+/SAPPORO-service/config/uwsgi.sock
+/SAPPORO-service/log/
+/SAPPORO-service/run/
+/SAPPORO-service/SAPPORO-service/app/local_config.py
 
-SAPPORO-web/config/uwsgi.sock
-SAPPORO-web/log/
-SAPPORO-web/SAPPORO-web/app/migrations/
-SAPPORO-web/SAPPORO-web/config/local_settings.py
-SAPPORO-web/SAPPORO-web/static/
+/SAPPORO-web/config/uwsgi.sock
+/SAPPORO-web/log/
+/SAPPORO-web/SAPPORO-web/app/migrations/
+/SAPPORO-web/SAPPORO-web/config/local_settings.py
+/SAPPORO-web/SAPPORO-web/static/
 
-SAPPORO-fileserver/input_data/
-SAPPORO-fileserver/output_data/
-SAPPORO-fileserver/log/
+/SAPPORO-fileserver/input_data/
+/SAPPORO-fileserver/output_data/
+/SAPPORO-fileserver/nginx/cache/
+/SAPPORO-fileserver/nginx/run/
+/SAPPORO-fileserver/log/nginx/
 
 !.gitkeep
 
