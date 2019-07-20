@@ -14,7 +14,7 @@ services:
     user: ${UID:-0}:${GID:-0}
     command: ["nginx", "-g", "daemon off;"]
     ports:
-      - 1124:8080
+      - 1123:8080
     networks:
       - sapporo
   output:
@@ -40,7 +40,7 @@ services:
         "/opt/SAPPORO/SAPPORO-fileserver/data/output_data",
       ]
     ports:
-      - 1123:8080
+      - 1124:8080
     networks:
       - sapporo
 
