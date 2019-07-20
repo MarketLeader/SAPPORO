@@ -1,15 +1,10 @@
 FROM python:slim
 
-WORKDIR /opt/SAPPORO-service
+WORKDIR /opt/SAPPORO/SAPPORO-service
 
 RUN apt update && \
     apt install -y \
-    build-essential \
-    iproute2 \
-    jq \
-    procps && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/*
+    build-essential
 
 COPY requirements.txt /tmp
 
@@ -17,6 +12,10 @@ RUN pip install -U pip wheel setuptools && \
     pip install -r /tmp/requirements.txt && \
     rm -rf /tmp/requirements.txt
 
-COPY entry_point.sh /opt/SAPPORO-service
+# The workflow engine you want to use.
+RUN apt install -y \
+    cwltool && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
 
 CMD ["tail", "-f", "/dev/null"]
