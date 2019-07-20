@@ -7,28 +7,29 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
-      - /tmp:/tmp
-      - ./SAPPORO-service:/opt/SAPPORO-service/SAPPORO-service
-      - ./config:/opt/SAPPORO-service/config
-      - ./log:/opt/SAPPORO-service/log
-      - ./run:/opt/SAPPORO-service/run
+      - /var/lib/docker:/var/lib/docker
+      - ${PWD}/etc:/opt/SAPPORO/SAPPORO-service/etc
+      - ${PWD}/log:/opt/SAPPORO/SAPPORO-service/log
+      - ${PWD}/run:/opt/SAPPORO/SAPPORO-service/run
+      - ${PWD}/src:/opt/SAPPORO/SAPPORO-service/src
+      - ${PWD}/service-info.yml:/opt/SAPPORO/SAPPORO-service/service-info.ym
+      - ${PWD}/workflow-info.yml:/opt/SAPPORO/SAPPORO-service/workflow-info.yml
     networks:
       - sapporo
     environment:
       - LOG_LEVEL=INFO # DEBUG or INFO
       - ENABLE_GET_RUNS=False
       - ENABLE_TOKEN_AUTH=False
-    command: ["/bin/bash", "/opt/SAPPORO-service/entry_point.sh"]
+    command: ["/bin/bash", "/opt/SAPPORO/SAPPORO-service/entry_point.sh"]
   web:
-    image: nginx:stable-alpine
+    image: nginx:1.16.0-alpine
     container_name: sapporo-service-web
     depends_on:
       - app
     restart: always
     volumes:
-      - ./config/nginx.conf:/etc/nginx/nginx.conf
-      - ./config:/opt/SAPPORO-service/config
-      - ./log:/opt/SAPPORO-service/log
+      - ${PWD}/etc:/opt/SAPPORO/SAPPORO-service/etc
+      - ${PWD}/log/nginx:/var/log/nginx
     networks:
       - sapporo
     ports:
