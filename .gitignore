@@ -12,8 +12,8 @@
 
 /SAPPORO-fileserver/data/input_data/
 /SAPPORO-fileserver/data/output_data/
-/SAPPORO-fileserver/etc/nginx_cache/
-/SAPPORO-fileserver/etc/nginx_run/
+/SAPPORO-fileserver/etc/nginx/cache/
+/SAPPORO-fileserver/etc/nginx/run/
 /SAPPORO-fileserver/log/
 
 !.gitkeep
