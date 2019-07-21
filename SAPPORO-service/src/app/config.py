@@ -49,14 +49,14 @@ def generate_secret_key():
     SECRET_KEY_FILE_PATH = Path(__file__).absolute(
     ).parent.joinpath(SECRET_KEY_FILE_NAME)
     if SECRET_KEY_FILE_PATH.exists():
-        with SECRET_KEY_FILE_PATH.open(mode="w") as f:
-            secret_key = secrets.token_urlsafe(32)
-            f.write(secret_key)
-    else:
         with SECRET_KEY_FILE_PATH.open(mode="r") as f:
             for line in f.readlines():
                 if line != "":
                     secret_key = line
+    else:
+        with SECRET_KEY_FILE_PATH.open(mode="w") as f:
+            secret_key = secrets.token_urlsafe(32)
+            f.write(secret_key)
 
     return secret_key
 

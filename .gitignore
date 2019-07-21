@@ -1,8 +1,10 @@
+/SAPPORO-service/etc/nginx/cache
+/SAPPORO-service/etc/nginx/run
 /SAPPORO-service/etc/token_list.txt
 /SAPPORO-service/etc/uwsgi/uwsgi.sock
 /SAPPORO-service/log/
 /SAPPORO-service/run/
-/SAPPORO-service/SAPPORO-service/app/secret_key.txt
+/SAPPORO-service/src/app/secret_key.txt
 
 /SAPPORO-web/config/uwsgi.sock
 /SAPPORO-web/log/
