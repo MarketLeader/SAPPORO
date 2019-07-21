@@ -20,8 +20,7 @@ services:
       - ENABLE_GET_RUNS=False
       - ENABLE_TOKEN_AUTH=False
     # user: ${UID:-0}:${GID:-0}
-    command: ["tail", "-f", "/dev/null"]
-    # command: ["uwsgi", "/opt/SAPPORO-service/config/uwsgi.ini"]
+    command: ["uwsgi", "/opt/SAPPORO/SAPPORO-service/etc/uwsgi/uwsgi.ini"]
     networks:
       - sapporo
   web:

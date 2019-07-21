@@ -4,7 +4,6 @@ import shlex
 import signal
 from datetime import datetime
 from subprocess import PIPE, Popen
-from time import sleep
 from uuid import uuid4
 
 import yaml

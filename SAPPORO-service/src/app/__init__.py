@@ -8,7 +8,7 @@ from .util import fix_errorhandler, set_logger
 
 
 def create_app():
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
     app.config.from_mapping(d_config)
     app.register_blueprint(bp_app, url_prefix="/")
     fix_errorhandler(app)

@@ -19,8 +19,8 @@ services:
       - ENABLE_GET_RUNS=False
       - ENABLE_TOKEN_AUTH=False
     # user: ${UID:-0}:${GID:-0}
-    command: ["tail", "-f", "/dev/null"]
-    # command: ["/bin/bash", "/opt/SAPPORO/SAPPORO-service/etc/entry_point.sh"]
+    command:
+      ["/usr/local/bin/python3", "/opt/SAPPORO/SAPPORO-service/src/run.py"]
     networks:
       - sapporo
     ports:

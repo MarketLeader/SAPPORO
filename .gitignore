@@ -1,8 +1,8 @@
-/SAPPORO-service/config/token_list.txt
-/SAPPORO-service/config/uwsgi.sock
+/SAPPORO-service/etc/token_list.txt
+/SAPPORO-service/etc/uwsgi/uwsgi.sock
 /SAPPORO-service/log/
 /SAPPORO-service/run/
-/SAPPORO-service/SAPPORO-service/app/local_config.py
+/SAPPORO-service/SAPPORO-service/app/secret_key.txt
 
 /SAPPORO-web/config/uwsgi.sock
 /SAPPORO-web/log/

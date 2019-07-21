@@ -1,5 +1,4 @@
 #!/bin/bash
-# set -eux
 
 function run_wf() {
   if [[ ${execution_engine} == "cwltool" ]]; then

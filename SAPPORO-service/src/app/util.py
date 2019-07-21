@@ -47,7 +47,7 @@ def token_auth(func):
     def wrapper(*args, **kwargs):
         if ENABLE_TOKEN_AUTH:
             token_list = SERVICE_BASE_DIR.joinpath(
-                "config").joinpath("token_list.txt")
+                "etc").joinpath("token_list.txt")
             if token_list.exists() is False:
                 abort(401, "Unauthorized.")
             request_token = request.headers.get("Authorization", None)
