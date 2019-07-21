@@ -19,8 +19,9 @@ services:
       - LOG_LEVEL=DEBUG # DEBUG or INFO
       - ENABLE_GET_RUNS=False
       - ENABLE_TOKEN_AUTH=False
-    user: ${UID:-0}:${GID:-0}
-    command: ["/bin/bash", "/opt/SAPPORO/SAPPORO-service/etc/entry_point.sh"]
+    # user: ${UID:-0}:${GID:-0}
+    command: ["tail", "-f", "/dev/null"]
+    # command: ["uwsgi", "/opt/SAPPORO-service/config/uwsgi.ini"]
     networks:
       - sapporo
   web:

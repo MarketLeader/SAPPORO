@@ -4,7 +4,11 @@ WORKDIR /opt/SAPPORO/SAPPORO-service
 
 RUN apt update && \
     apt install -y \
-    build-essential
+    build-essential \
+    curl \
+    iproute2 \
+    jq \
+    tree
 
 COPY requirements.txt /tmp
 
