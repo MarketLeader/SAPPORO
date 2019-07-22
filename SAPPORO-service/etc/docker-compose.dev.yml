@@ -14,17 +14,17 @@ services:
       - ${PWD}/../src:/opt/SAPPORO/SAPPORO-service/src
       - ${PWD}/../workflow-info.yml:/opt/SAPPORO/SAPPORO-service/workflow-info.yml
     environment:
-      - DEBUG=True # Flask debug mode
-      - LOG_LEVEL=DEBUG # DEBUG or INFO
-      - ENABLE_GET_RUNS=False
-      - ENABLE_TOKEN_AUTH=False
-    user: ${UID:-0}:999 # Docker group
+      - DEBUG=${SAPPORO-SERVICE_DEBUG:-True} # Flask debug mode
+      - LOG_LEVEL=${SAPPORO-SERVICE_LOG_LEVEL:-DEBUG} # DEBUG or INFO
+      - ENABLE_GET_RUNS=${SAPPORO-SERVICE_ENABLE_GET_RUNS:-False}
+      - ENABLE_TOKEN_AUTH=${SAPPORO-SERVICE_ENABLE_TOKEN_AUTH:-False}
+    user: ${UID:-0}:${DOCKER_GID:-999} # Docker group
     command:
       ["/usr/local/bin/python3", "/opt/SAPPORO/SAPPORO-service/src/run.py"]
     networks:
       - sapporo
     ports:
-      - 1122:8080
+      - ${SAPPORO-SERVICE_PORT:-1122}:8080
 
 networks:
   sapporo:
