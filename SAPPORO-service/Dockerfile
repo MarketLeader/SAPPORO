@@ -10,7 +10,7 @@ RUN apt update && \
     jq \
     tree
 
-COPY requirements.txt /tmp
+COPY etc/requirements.txt /tmp
 
 RUN pip install -U pip wheel setuptools && \
     pip install -r /tmp/requirements.txt && \
@@ -22,4 +22,8 @@ RUN apt install -y \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-CMD ["tail", "-f", "/dev/null"]
+COPY src /opt/SAPPORO/SAPPORO-service/src
+COPY service-info.yml /opt/SAPPORO/SAPPORO-service
+COPY workflow-info.yml /opt/SAPPORO/SAPPORO-service
+
+CMD ["/usr/local/bin/python3", "/opt/SAPPORO/SAPPORO-service/src/run.py"]

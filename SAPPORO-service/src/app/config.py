@@ -9,15 +9,13 @@ APPLICATION_ROOT = "/"
 JSON_AS_ASCII = False
 JSON_SORT_KEYS = True
 JSONIFY_PRETTYPRINT_REGULAR = True
-LOG_FILE_PATH = "/opt/SAPPORO/SAPPORO-service/log/app/flask.log"
+LOG_FILE_PATH = Path("/opt/SAPPORO/SAPPORO-service/log/app/flask.log")
+LOG_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
 def generate_d_config():
     d_config = dict()
-    if os.environ.get("DEBUG", None) is None:
-        d_config["DEBUG"] = False
-    else:
-        d_config["DEBUG"] = str2bool(os.environ.get("DEBUG"))
+    d_config["DEBUG"] = str2bool(os.environ.get("DEBUG", "True"))
     if d_config["DEBUG"]:
         d_config["ENV"] = "development"
         d_config["TESTING"] = True
@@ -62,6 +60,6 @@ def generate_secret_key():
 
 
 d_config = generate_d_config()
-ENABLE_GET_RUNS = str2bool(os.environ.get("ENABLE_GET_RUNS"))
-ENABLE_TOKEN_AUTH = str2bool(os.environ.get("ENABLE_TOKEN_AUTH"))
-LOG_LEVEL = os.environ.get("LOG_LEVEL")
+ENABLE_GET_RUNS = str2bool(os.environ.get("ENABLE_GET_RUNS", "False"))
+ENABLE_TOKEN_AUTH = str2bool(os.environ.get("ENABLE_TOKEN_AUTH", "False"))
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG")

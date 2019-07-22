@@ -13,6 +13,7 @@ from .util import SERVICE_BASE_DIR, read_service_info, read_workflow_info
 from .workflows import fetch_file
 
 RUN_BASE_DIR = SERVICE_BASE_DIR.joinpath("run")
+RUN_BASE_DIR.mkdir(parents=True, exist_ok=True)
 RUN_ORDER_FILE_NAME = "run_order.yml"
 WORKFLOW_FILE_NAME = "workflow"
 WORKFLOW_PARAMETERS_FILE_NAME = "workflow_parameters"

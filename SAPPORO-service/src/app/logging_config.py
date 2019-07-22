@@ -27,7 +27,7 @@ TEMPLATE = {
             "level": "INFO",
             "class": "logging.FileHandler",
             "formatter": "default",
-            "filename": LOG_FILE_PATH,
+            "filename": str(LOG_FILE_PATH),
         },
     },
     "root": {

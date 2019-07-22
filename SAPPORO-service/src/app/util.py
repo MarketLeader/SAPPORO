@@ -70,12 +70,12 @@ def token_auth(func):
 
 def set_logger():
     if d_config["DEBUG"]:
-        if os.environ.get("LOG_LEVEL") == "DEBUG":
-            dictConfig(local_debug)
-        else:
+        if os.environ.get("LOG_LEVEL", "DEBUG") == "INFO":
             dictConfig(local_info)
-    else:
-        if os.environ.get("LOG_LEVEL") == "DEBUG":
-            dictConfig(wsgi_debug)
         else:
+            dictConfig(local_debug)
+    else:
+        if os.environ.get("LOG_LEVEL", "DEBUG") == "INFO":
             dictConfig(wsgi_info)
+        else:
+            dictConfig(wsgi_debug)
