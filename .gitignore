@@ -11,6 +11,8 @@
 /SAPPORO-web/etc/uwsgi/uwsgi.sock
 /SAPPORO-web/log/
 /SAPPORO-web/src/app/migrations/
+/SAPPORO-web/src/config/secret_key.txt
+/SAPPORO-web/src/static/
 
 /SAPPORO-fileserver/data/input_data/
 /SAPPORO-fileserver/data/output_data/

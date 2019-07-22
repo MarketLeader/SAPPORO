@@ -8,7 +8,6 @@ from flask import abort, jsonify, request
 
 from .config import ENABLE_TOKEN_AUTH, d_config
 from .lib.util import SERVICE_BASE_DIR
-from .logging_config import local_debug, local_info, wsgi_debug, wsgi_info
 
 root_logger = logging.getLogger()
 
@@ -70,12 +69,14 @@ def token_auth(func):
 
 def set_logger():
     if d_config["DEBUG"]:
-        if os.environ.get("LOG_LEVEL", "DEBUG") == "INFO":
+        from .logging_config import local_debug, local_info
+        if os.environ.get("LOG_LEVEL", "") == "INFO":
             dictConfig(local_info)
         else:
             dictConfig(local_debug)
     else:
-        if os.environ.get("LOG_LEVEL", "DEBUG") == "INFO":
+        from .logging_config import wsgi_debug, wsgi_info
+        if os.environ.get("LOG_LEVEL", "") == "INFO":
             dictConfig(wsgi_info)
         else:
             dictConfig(wsgi_debug)

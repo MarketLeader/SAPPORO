@@ -1,9 +1,8 @@
 # coding: utf-8
+import secrets
 import os
 from distutils.util import strtobool
 from pathlib import Path
-
-from config.local_settings import SECRET_KEY as LOCAL_SECRET_KEY
 
 
 def str2bool(arg):
@@ -15,7 +14,9 @@ def str2bool(arg):
                 return False
         except ValueError:
             raise Exception(
-                "Please check your docker-compose.yml:environment, The bool value should be 'true value are y, yes, t, true, on and 1; false values are n, no, f, false, off and 0'")
+                "Please check your docker-compose.yml:environment, "
+                "The bool value should be 'true value are y, yes, t, "
+                "true, on and 1; false values are n, no, f, false, off and 0'")
     else:
         if arg:
             return True
@@ -23,29 +24,45 @@ def str2bool(arg):
             return False
 
 
+def generate_secret_key():
+    SECRET_KEY_FILE_NAME = "secret_key.txt"
+    SECRET_KEY_FILE_PATH = Path(__file__).absolute(
+    ).parent.joinpath(SECRET_KEY_FILE_NAME)
+    if SECRET_KEY_FILE_PATH.exists():
+        with SECRET_KEY_FILE_PATH.open(mode="r") as f:
+            for line in f.readlines():
+                if line != "":
+                    secret_key = line
+    else:
+        with SECRET_KEY_FILE_PATH.open(mode="w") as f:
+            secret_key = secrets.token_urlsafe(32)
+            f.write(secret_key)
+
+    return secret_key
+
+
 BASE_DIR = Path(__file__).absolute().parent.parent
-DEBUG = str2bool(os.environ.get("DEBUG", False))
+DEBUG = str2bool(os.environ.get("DEBUG", True))
 LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "en")
 TIME_ZONE = os.environ.get("TIME_ZONE", "UTC")
 ENABLE_USER_SIGNUP = str2bool(os.environ.get("ENABLE_USER_SIGNUP", True))
-
-LOG_FILE_PATH = str(BASE_DIR.joinpath("../log/django.log").resolve())
+LOG_FILE_PATH = str(BASE_DIR.joinpath("../log/app/django.log").resolve())
 
 if DEBUG:
     from .logging_config import local_info, local_debug
-    if os.environ.get("LOG_LEVEL") == "DEBUG":
-        LOGGING = local_debug
-    else:
+    if os.environ.get("LOG_LEVEL", "") == "INFO":
         LOGGING = local_info
+    else:
+        LOGGING = local_debug
 else:
     from .logging_config import wsgi_info, wsgi_debug
-    if os.environ.get("LOG_LEVEL") == "DEBUG":
-        LOGGING = wsgi_debug
-    else:
+    if os.environ.get("LOG_LEVEL", "") == "INFO":
         LOGGING = wsgi_info
+    else:
+        LOGGING = wsgi_debug
 
 ALLOWED_HOSTS = ["*"]
-SECRET_KEY = LOCAL_SECRET_KEY
+SECRET_KEY = generate_secret_key()
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -122,11 +139,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": os.environ.get("POSTGRES_DB"),
-            "USER": os.environ.get("POSTGRES_USER"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+            "NAME": os.environ.get("POSTGRES_DB", "sapporo-web"),
+            "USER": os.environ.get("POSTGRES_USER", "sapporo-web-user"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "sapporo-web-passwd"),
             "HOST": "database",
-            "PORT": int(os.environ.get("POSTGRES_PORT")),
+            "PORT": int(os.environ.get("POSTGRES_PORT", 5432)),
         }
     }
 
