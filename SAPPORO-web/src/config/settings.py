@@ -142,7 +142,7 @@ else:
             "NAME": os.environ.get("POSTGRES_DB", "sapporo-web"),
             "USER": os.environ.get("POSTGRES_USER", "sapporo-web-user"),
             "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "sapporo-web-passwd"),
-            "HOST": "database",
+            "HOST": "sapporo-web-database",
             "PORT": int(os.environ.get("POSTGRES_PORT", 5432)),
         }
     }

@@ -12,6 +12,7 @@ services:
       - ${PWD}/log/app:/opt/SAPPORO/SAPPORO-service/log/app
       - ${PWD}/run:/opt/SAPPORO/SAPPORO-service/run
       - ${PWD}/service-info.yml:/opt/SAPPORO/SAPPORO-service/service-info.yml
+      - ${PWD}/src:/opt/SAPPORO/SAPPORO-service/src
       - ${PWD}/workflow-info.yml:/opt/SAPPORO/SAPPORO-service/workflow-info.yml
     environment:
       - DEBUG=${SAPPORO_SERVICE_DEBUG:-False} # Flask debug mode

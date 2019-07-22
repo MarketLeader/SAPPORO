@@ -5,8 +5,9 @@ services:
     container_name: sapporo-web-app
     restart: always
     volumes:
-      - ${PWD}/etc/uwsgi:/opt/SAPPORO/SAPPORO-service/etc/uwsgi
-      - ${PWD}/log/app:/opt/SAPPORO/SAPPORO-service/log/app
+      - ${PWD}/etc/uwsgi:/opt/SAPPORO/SAPPORO-web/etc/uwsgi
+      - ${PWD}/log/app:/opt/SAPPORO/SAPPORO-web/log/app
+      - ${PWD}/src:/opt/SAPPORO/SAPPORO-web/src
     environment:
       - DEBUG=${SAPPORO_WEB_DEBUG:-False} # Django debug mode and Use SQLite
       - ENABLE_USER_SIGNUP=${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True}

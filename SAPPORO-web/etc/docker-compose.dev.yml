@@ -2,7 +2,7 @@ version: "3"
 services:
   app:
     image: suecharo/sapporo-web:v0.3.6
-    container_name: sapporo-service-web-dev
+    container_name: sapporo-web-dev
     restart: always
     volumes:
       - ${PWD}/../src:/opt/SAPPORO/SAPPORO-web/src
