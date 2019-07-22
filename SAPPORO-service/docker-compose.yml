@@ -9,15 +9,15 @@ services:
       - /var/lib/docker:/var/lib/docker
       - /var/run/docker.sock:/var/run/docker.sock
       - ${PWD}/etc/uwsgi:/opt/SAPPORO/SAPPORO-service/etc/uwsgi
-      - ${PWD}/log:/opt/SAPPORO/SAPPORO-service/log
+      - ${PWD}/log/app:/opt/SAPPORO/SAPPORO-service/log/app
       - ${PWD}/run:/opt/SAPPORO/SAPPORO-service/run
       - ${PWD}/service-info.yml:/opt/SAPPORO/SAPPORO-service/service-info.yml
       - ${PWD}/workflow-info.yml:/opt/SAPPORO/SAPPORO-service/workflow-info.yml
     environment:
-      - DEBUG=${SAPPORO-SERVICE_DEBUG:-False} # Flask debug mode
-      - LOG_LEVEL=${SAPPORO-SERVICE_LOG_LEVEL:-DEBUG} # DEBUG or INFO
-      - ENABLE_GET_RUNS=${SAPPORO-SERVICE_ENABLE_GET_RUNS:-False}
-      - ENABLE_TOKEN_AUTH=${SAPPORO-SERVICE_ENABLE_TOKEN_AUTH:-False}
+      - DEBUG=${SAPPORO_SERVICE_DEBUG:-False} # Flask debug mode
+      - ENABLE_GET_RUNS=${SAPPORO_SERVICE_ENABLE_GET_RUNS:-False}
+      - ENABLE_TOKEN_AUTH=${SAPPORO_SERVICE_ENABLE_TOKEN_AUTH:-False}
+      - LOG_LEVEL=${SAPPORO_SERVICE_LOG_LEVEL:-INFO} # DEBUG or INFO
     user: ${UID:-0}:${DOCKER_GID:-999} # Docker group
     command: ["uwsgi", "/opt/SAPPORO/SAPPORO-service/etc/uwsgi/uwsgi.ini"]
     networks:
@@ -33,11 +33,10 @@ services:
       - ${PWD}/etc/uwsgi:/etc/nginx/uwsgi
       - ${PWD}/log/nginx:/var/log/nginx
     user: ${UID:-0}:${GID:-0}
-    command: ["nginx", "-g", "daemon off;"]
     networks:
       - sapporo
     ports:
-      - ${SAPPORO-SERVICE_PORT:-1122}:8080
+      - ${SAPPORO_SERVICE_PORT:-1122}:8080
     depends_on:
       - app
 

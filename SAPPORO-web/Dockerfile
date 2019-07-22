@@ -1,21 +1,24 @@
 FROM python:slim
 
-WORKDIR /opt/SAPPORO-web
+WORKDIR /opt/SAPPORO/SAPPORO-web
 
 RUN apt update && \
     apt install -y \
     build-essential \
-    iproute2 && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/*
+    curl \
+    iproute2 \
+    jq \
+    tree
 
-COPY requirements.txt /tmp
+COPY etc/requirements.txt /tmp
 
 RUN pip install -U pip wheel setuptools && \
     pip install -r /tmp/requirements.txt && \
     rm -rf /tmp/requirements.txt
 
-COPY entry_point.sh /opt/SAPPORO-web
-ADD https://raw.githubusercontent.com/eficode/wait-for/master/wait-for /opt/SAPPORO-web
+COPY entry_point.sh /usr/local/bin
+ADD https://raw.githubusercontent.com/eficode/wait-for/master/wait-for /usr/local/bin
 
-CMD ["tail", "-f", "/dev/null"]
+COPY src /opt/SAPPORO/SAPPORO-web/src
+
+CMD ["entry_point.sh"]

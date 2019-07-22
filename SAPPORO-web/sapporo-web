@@ -383,3 +383,48 @@ done
 
 echo "Access http://0.0.0.0:${ARG_PORT}/ in your browser"
 echo "Finish web-up..."
+
+
+---
+
+MIGRATE
+
+#!/bin/bash
+python3 /opt/SAPPORO-web/SAPPORO-web/manage.py makemigrations app
+python3 /opt/SAPPORO-web/SAPPORO-web/manage.py migrate
+
+---
+
+DEV TEST UP
+
+#!/bin/bash
+rm -rf ../SAPPORO-web/db.sqlite3
+docker-compose -f docker-compose.dev.yml up -d --build
+docker-compose -f docker-compose.dev.yml exec app /bin/bash /opt/SAPPORO-web/test/migrate.sh
+docker-compose -f docker-compose.dev.yml exec app python3 /opt/SAPPORO-web/SAPPORO-web/manage.py createsuperuser
+docker-compose -f docker-compose.dev.yml exec app /bin/bash /opt/SAPPORO-web/test/run_server.sh
+
+---
+
+coverage django-allauth django-bootstrap4 django-debug-toolbar Django psycopg2-binary PyYAML uWSGI
+
+cd etc
+docker run -it --rm -v `pwd`:`pwd` python pip3 install coverage django-allauth django-bootstrap4 django-debug-toolbar Django psycopg2-binary PyYAML uWSGI; pip freeze > `pwd`
+
+
+----
+
+RUN run_server
+
+#!/bin/bash
+python3 /opt/SAPPORO-web/SAPPORO-web/manage.py runserver
+
+
+---
+
+RUN test
+
+#!/bin/bash
+coverage run /opt/SAPPORO-web/SAPPORO-web/manage.py test app
+coverage report
+coverage html

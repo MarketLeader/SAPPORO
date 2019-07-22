@@ -11,11 +11,10 @@ services:
       - ${PWD}/etc/nginx/run:/var/run/nginx
       - ${PWD}/log/nginx:/var/log/nginx
     user: ${UID:-0}:${GID:-0}
-    command: ["nginx", "-g", "daemon off;"]
     networks:
       - sapporo
     ports:
-      - 1123:8080
+      - ${SAPPORO_FILESERVER_INPUT_PORT:-1123}:8080
   output:
     image: minio/minio:RELEASE.2019-07-17T22-54-12Z
     container_name: sapporo-fileserver-output
@@ -24,17 +23,17 @@ services:
       - ${PWD}/data/output_data:/data
       - ${PWD}/log/minio:/var/log/minio
     environment:
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-access_key}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-secret_access_key}
-      MINIO_USERNAME: ${UID:-0}
-      MINIO_GROUPNAME: ${GID:-0}
-      MINIO_HTTP_TRACE: /var/log/minio/access.log
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-access_key}
+      - MINIO_GROUPNAME=${GID:-0}
+      - MINIO_HTTP_TRACE=/var/log/minio/access.log
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-secret_access_key}
+      - MINIO_USERNAME=${UID:-0}
     user: ${UID:-0}:${GID:-0}
     command: ["server", "--address", "0.0.0.0:8080", "/data"]
     networks:
       - sapporo
     ports:
-      - 1124:8080
+      - ${SAPPORO_FILESERVER_OUTPUT_PORT:-1124}:8080
 
 networks:
   sapporo:
