@@ -44,7 +44,7 @@ def generate_secret_key():
 BASE_DIR = Path(__file__).absolute().parent.parent
 DEBUG = str2bool(os.environ.get("DEBUG", True))
 LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "en")
-TIME_ZONE = os.environ.get("TIME_ZONE", "UTC")
+TIMEZONE = os.environ.get("TIMEZONE", "UTC")
 ENABLE_USER_SIGNUP = str2bool(os.environ.get("ENABLE_USER_SIGNUP", True))
 LOG_FILE_PATH = str(BASE_DIR.joinpath("../log/app/django.log").resolve())
 

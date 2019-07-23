@@ -3,7 +3,7 @@ info:
   title: SAPPORO-service REST-API Definition
   description: SAPPORO-service REST-API Specification Sheet
   version: 1.0.0
-host: localhost:1121
+host: localhost:1122
 basePath: /
 schemes:
   - http

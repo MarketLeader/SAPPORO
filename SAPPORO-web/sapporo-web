@@ -1,430 +1,654 @@
 #!/bin/bash
-cd `dirname $0`
-CMDNAME=`basename $0`
+SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+cd $SCRIPT_DIR
+DOCKER_COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
+DOCKER_COMPOSE_DEV_FILE="$SCRIPT_DIR/etc/docker-compose.dev.yml"
+UID=$(id -u)
+GID=$(id -g)
+DOCKER_GID=$(cat /etc/group | grep docker | cut -d ":" -f 3)
+PIP_PACKAGES="coverage Django django-allauth django-bootstrap4 django-debug-toolbar psycopg2-binary PyYAML requests uWSGI"
 
-function usage () {
-  cat << EOS
-Usage: $CMDNAME
-Script to create the super user.
+function show_base_usage() {
+  cat <<EOS
+sapporo-web is a set of management commands for SAPPORO-web.
+
+Usage:
+  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIMEZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
+  sapporo-web create-super-user
+  sapporo-web down
+  sapporo-web clean
+  sapporo-web dev (up|create-super-user|down|clean|freeze|build|test) [-h]
+
+Option:
+  -h, --help                  Print usage.
+  -v, --version               Print version.
+EOS
+}
+
+function show_version() {
+  grep 'suecharo/sapporo-web' $DOCKER_COMPOSE_FILE | cut -d ':' -f 3
+}
+
+function check_docker() {
+  if !(type "docker" >/dev/null 2>&1); then
+    echo "[FATAL] Please install docker."
+    exit 1
+  else
+    if !(pgrep -f "docker" >/dev/null 2>&1); then
+      echo "[FATAL] The docker engine does not seem to be running."
+      exit 1
+    fi
+  fi
+}
+
+function check_docker_compose() {
+  if !(type "docker-compose" >/dev/null 2>&1); then
+    echo "[FATAL] Please install docker-compose."
+    exit 1
+  fi
+}
+
+function show_web_up_usage() {
+  cat <<EOS
+Usage:
+  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIMEZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
+
+Option:
+  -d, --debug                 Use Flask debug mode (default False).
+  -p, --port PORT             Set the host TCP/IP port (default 1121).
+  -l, --log-level INFO|DEBUG  Set log level (default INFO).
+  -t, --timezone TIMEZONE     Set the timezone (default Asia/Tokyo).
+  --language-code CODE        Set the timezone (default en).
+  --enable-user-signup        Enable user signup (default True).
+  -h, --help                  Print usage.
+EOS
+}
+
+function web_up() {
+  while [[ $# > 0 ]]; do
+    case $1 in
+    "-h" | "--help")
+      shift 1
+      if [[ $# -ne 0 ]]; then
+        printf "[FATAL] Unexpected Option or Args: $1\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      show_web_up_usage
+      exit 0
+      ;;
+    "-d" | "--debug")
+      SAPPORO_WEB_DEBUG="True"
+      shift 1
+      ;;
+    "-p" | "--port")
+      if [[ -z $2 ]]; then
+        printf "[FATAL] Please enter the PORT num.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      expr $2 + 1 >/dev/null 2>&1
+      if [[ $? -ge 2 ]]; then
+        printf "[FATAL] Please enter int type for the PORT num.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      if [[ $2 -lt 1 ]]; then
+        printf "[FATAL] PORT num must be greater than 1.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      SAPPORO_WEB_PORT=$2
+      shift 2
+      ;;
+    "-l" | "--log-level")
+      if [[ -z $2 ]]; then
+        printf "[FATAL] Please enter the LOG_LEVEL(INFO|DEBUG).\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      if [[ "$2" != "INFO" && "$2" != "DEBUG" ]]; then
+        printf "[FATAL] Please enter the LOG_LEVEL(INFO|DEBUG).\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      SAPPORO_WEB_LOG_LEVEL=$2
+      shift 2
+      ;;
+    "-t" | "--timezone")
+      if [[ -z $2 ]]; then
+        printf "[FATAL] Please enter the TIMEZONE.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      SAPPORO_WEB_TIMEZONE=$2
+      shift 2
+      ;;
+    "--language-code")
+      if [[ -z $2 ]]; then
+        printf "[FATAL] Please enter the LANGUAGE_CODE.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      SAPPORO_WEB_LANGUAGE_CODE=$2
+      shift 2
+      ;;
+    "--enable-user-signup")
+      SAPPORO_WEB_ENABLE_USER_SIGNUP="True"
+      shift 1
+      ;;
+    -*)
+      printf "[FATAL] Unexpected Option: $1\n\n"
+      show_web_up_usage
+      exit 1
+      ;;
+    *)
+      printf "[FATAL] Unexpected Args: $1\n\n"
+      show_web_up_usage
+      exit 1
+      ;;
+    esac
+  done
+  check_docker
+  check_docker_compose
+
+  printf "Start SAPPORO-web up...\n\n"
+  cat <<EOS
+  Debug              : ${SAPPORO_WEB_DEBUG:-False}
+  Port               : ${SAPPORO_WEB_PORT:-1121}
+  Log Level          : ${SAPPORO_WEB_LOG_LEVEL:-INFO}
+  Timezone           : ${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo}
+  Language Code      : ${SAPPORO_WEB_LANGUAGE_CODE:-en}
+  Enable User Signup : ${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True}
+EOS
+  printf "\n"
+  if [[ $(docker network ls | grep 'sapporo-network' | wc -l) == 0 ]]; then
+    echo "Creating the Docker network: sapporo-network"
+    docker network create sapporo-network
+  fi
+  PWD=$SCRIPT_DIR \
+    UID=$UID \
+    GID=$GID \
+    DOCKER_GID=$DOCKER_GID \
+    SAPPORO_WEB_DEBUG=${SAPPORO_WEB_DEBUG:-False} \
+    SAPPORO_WEB_PORT=${SAPPORO_WEB_PORT:-1121} \
+    SAPPORO_WEB_LOG_LEVEL=${SAPPORO_WEB_LOG_LEVEL:-INFO} \
+    SAPPORO_WEB_TIMEZONE=${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo} \
+    SAPPORO_WEB_LANGUAGE_CODE=${SAPPORO_WEB_LANGUAGE_CODE:-en} \
+    SAPPORO_WEB_ENABLE_USER_SIGNUP=${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True} \
+    docker-compose up -d
+  while [[ ! -e "$SCRIPT_DIR/etc/uwsgi/uwsgi.sock" ]]; do
+    sleep 2s
+    echo "Waiting for SAPPORO-web to start..."
+  done
+  printf "\nPlease accsess in your brouwser:\n\n"
+  echo "    http://localhost:${SAPPORO_WEB_PORT:-1121}/"
+  printf "\n"
+  printf "Finish SAPPORO-web up...\n"
+  exit 0
+}
+
+function web_create_super_user() {
+  check_docker
+  check_docker_compose
+  printf "Start SAPPORO-web create suepr user...\n"
+  PWD=$SCRIPT_DIR \
+    UID=$UID \
+    GID=$GID \
+    DOCKER_GID=$DOCKER_GID \
+    docker-compose \
+    exec \
+    -u $UID:$GID \
+    app \
+    python3 /opt/SAPPORO/SAPPORO-web/src/manage.py createsuperuser
+  printf "Finish SAPPORO-web create suepr user...\n"
+  exit 0
+}
+
+function web_down() {
+  check_docker
+  check_docker_compose
+  printf "Start SAPPORO-web down...\n"
+  docker-compose down
+  printf "Finish SAPPORO-web down...\n"
+  exit 0
+}
+
+function web_clean() {
+  printf "Start SAPPORO-web clean...\n"
+  rm -rf $SCRIPT_DIR/etc/nginx/cache/*
+  rm -rf $SCRIPT_DIR/etc/nginx/run/*
+  rm -rf $SCRIPT_DIR/etc/uwsgi/uwsgi.sock
+  rm -rf $SCRIPT_DIR/log/app/*
+  rm -rf $SCRIPT_DIR/log/nginx/*
+  rm -rf $SCRIPT_DIR/src/app/migrations/*
+  rm -rf $SCRIPT_DIR/src/config/secret_key.txt
+  rm -rf $SCRIPT_DIR/src/static/*
+  find $SCRIPT_DIR/src -type d | grep pycache | xargs rm -rf
+  docker volume rm sapporo-web_postgres-data
+  printf "Finish SAPPORO-web clean...\n"
+  exit 0
+}
+
+function show_dev_usage() {
+  cat <<EOS
+Usage:
+  sapporo-web dev up [-p <PORT>] [-l DEBUG|INFO] [-t <TIMEZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
+  sapporo-web dev create-super-user
+  sapporo-web dev down
+  sapporo-web dev clean
+  sapporo-web dev freeze
+  sapporo-web dev build <version>
+  sapporo-web dev test
 
 Option:
   -h, --help                  Print usage.
 EOS
 }
 
-while [ $# -gt 0 ]; do
-  case $1 in
-    "-h" | "--help" )
-      usage
-      exit 1
-      ;;
-    * )
-      usage
-      exit 1
-      ;;
-  esac
-done
-
-DOCKER_COMPOSE_CONFIG_FILE=$(cd $(dirname $0)/.. && pwd)/docker-compose.yml
-
-docker-compose -f ${DOCKER_COMPOSE_CONFIG_FILE} exec app python3 /opt/SAPPORO-web/SAPPORO-web/manage.py createsuperuser
-
-
-
----
-
-
-#!/bin/bash
-cd `dirname $0`
-CMDNAME=`basename $0`
-
-function usage () {
-  cat << EOS
-Usage: $CMDNAME
-Script to clean SAPPORO-web.
+function show_web_dev_up_usage() {
+  cat <<EOS
+Usage:
+  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIMEZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
 
 Option:
+  -d, --debug                 Use Flask debug mode (default True).
+  -p, --port PORT             Set the host TCP/IP port (default 1121).
+  -l, --log-level INFO|DEBUG  Set log level (default DEBUG).
+  -t, --timezone TIMEZONE     Set the timezone (default Asia/Tokyo).
+  --language-code CODE        Set the timezone (default en).
+  --enable-user-signup        Enable user signup (default True).
   -h, --help                  Print usage.
 EOS
 }
 
-while [ $# -gt 0 ]; do
-  case $1 in
-    "-h" | "--help" )
-      usage
+function web_dev_up() {
+  while [[ $# > 0 ]]; do
+    case $1 in
+    "-h" | "--help")
+      shift 1
+      if [[ $# -ne 0 ]]; then
+        printf "[FATAL] Unexpected Option or Args: $1\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      show_web_up_usage
+      exit 0
+      ;;
+    "-d" | "--debug")
+      SAPPORO_WEB_DEBUG="True"
+      shift 1
+      ;;
+    "-p" | "--port")
+      if [[ -z $2 ]]; then
+        printf "[FATAL] Please enter the PORT num.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      expr $2 + 1 >/dev/null 2>&1
+      if [[ $? -ge 2 ]]; then
+        printf "[FATAL] Please enter int type for the PORT num.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      if [[ $2 -lt 1 ]]; then
+        printf "[FATAL] PORT num must be greater than 1.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      SAPPORO_WEB_PORT=$2
+      shift 2
+      ;;
+    "-l" | "--log-level")
+      if [[ -z $2 ]]; then
+        printf "[FATAL] Please enter the LOG_LEVEL(INFO|DEBUG).\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      if [[ "$2" != "INFO" && "$2" != "DEBUG" ]]; then
+        printf "[FATAL] Please enter the LOG_LEVEL(INFO|DEBUG).\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      SAPPORO_WEB_LOG_LEVEL=$2
+      shift 2
+      ;;
+    "-t" | "--timezone")
+      if [[ -z $2 ]]; then
+        printf "[FATAL] Please enter the TIMEZONE.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      SAPPORO_WEB_TIMEZONE=$2
+      shift 2
+      ;;
+    "--language-code")
+      if [[ -z $2 ]]; then
+        printf "[FATAL] Please enter the LANGUAGE_CODE.\n\n"
+        show_web_up_usage
+        exit 1
+      fi
+      SAPPORO_WEB_LANGUAGE_CODE=$2
+      shift 2
+      ;;
+    "--enable-user-signup")
+      SAPPORO_WEB_ENABLE_USER_SIGNUP="True"
+      shift 1
+      ;;
+    -*)
+      printf "[FATAL] Unexpected Option: $1\n\n"
+      show_web_up_usage
       exit 1
       ;;
-    * )
-      usage
+    *)
+      printf "[FATAL] Unexpected Args: $1\n\n"
+      show_web_up_usage
       exit 1
       ;;
-  esac
-done
+    esac
+  done
+  check_docker
+  check_docker_compose
+  cd $SCRIPT_DIR/etc
 
-WEB_ROOT=$(cd $(dirname $0)/.. && pwd)
-
-DOCKER_COMPOSE_CONFIG_FILE="${WEB_ROOT}/docker-compose.yml"
-
-echo "Start web-clean..."
-docker network rm sapporo-network > /dev/null 2>&1
-docker network rm sapporo-web_default > /dev/null 2>&1
-docker volume rm sapporo-web_postgres-data > /dev/null 2>&1
-rm -rf "${WEB_ROOT}/config/uwsgi.sock"
-rm -rf ${WEB_ROOT}/log/*
-rm -rf "${WEB_ROOT}/SAPPORO-web/app/migrations"
-rm -rf "${WEB_ROOT}/SAPPORO-web/config/local_settings.py"
-rm -rf "${WEB_ROOT}/SAPPORO-web/static"
-cat << EOS > ${DOCKER_COMPOSE_CONFIG_FILE}
-version: "3"
-services:
-  app:
-    image: suecharo/sapporo-web:v0.3.5
-    container_name: sapporo-web-app
-    depends_on:
-      - database
-    restart: always
-    volumes:
-      - ./SAPPORO-web:/opt/SAPPORO-web/SAPPORO-web
-      - ./config:/opt/SAPPORO-web/config
-      - ./log:/opt/SAPPORO-web/log
-    networks:
-      - sapporo
-    environment:
-      - LOG_LEVEL=INFO # DEBUG or INFO
-      - LANGUAGE_CODE=en
-      - TIME_ZONE=Asia/Tokyo
-      - ENABLE_USER_SIGNUP=True
-      - POSTGRES_USER=sapporo-web-user
-      - POSTGRES_PASSWORD=sapporo-web-passwd
-      - POSTGRES_DB=sapporo-web
-      - POSTGRES_PORT=5432
-    command: ["/bin/bash", "/opt/SAPPORO-web/entry_point.sh"]
-  web:
-    image: nginx:stable-alpine
-    container_name: sapporo-web-web
-    depends_on:
-      - app
-    restart: always
-    volumes:
-      - ./config/nginx.conf:/etc/nginx/nginx.conf
-      - ./config:/opt/SAPPORO-web/config
-      - ./log:/opt/SAPPORO-web/log
-      - ./SAPPORO-web/static:/opt/SAPPORO-web/SAPPORO-web/static
-    networks:
-      - sapporo
-    ports:
-      - 1121:80
-  database:
-    image: postgres:alpine
-    container_name: sapporo-web-database
-    restart: always
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - sapporo
-    environment:
-      - POSTGRES_USER=sapporo-web-user
-      - POSTGRES_PASSWORD=sapporo-web-passwd
-      - POSTGRES_DB=sapporo-web
-      - POSTGRES_PORT=5432
-
-volumes:
-  postgres-data:
-
-networks:
-  sapporo:
-    external:
-      name: sapporo-network
+  printf "Start SAPPORO-web dev up...\n\n"
+  cat <<EOS
+  Debug              : ${SAPPORO_WEB_DEBUG:-True}
+  Port               : ${SAPPORO_WEB_PORT:-1121}
+  Log Level          : ${SAPPORO_WEB_LOG_LEVEL:-DEBUG}
+  Timezone           : ${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo}
+  Language Code      : ${SAPPORO_WEB_LANGUAGE_CODE:-en}
+  Enable User Signup : ${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True}
 EOS
-
-echo "Finish web-clean..."
-
-
----
-
-#!/bin/bash
-cd `dirname $0`
-CMDNAME=`basename $0`
-
-function usage () {
-  cat << EOS
-Usage: $CMDNAME
-Script to down SAPPORO-web.
-
-Option:
-  -h, --help                  Print usage.
-EOS
+  printf "\n"
+  if [[ $(docker network ls | grep 'sapporo-network' | wc -l) == 0 ]]; then
+    echo "Creating the Docker network: sapporo-network"
+    docker network create sapporo-network
+  fi
+  PWD=$SCRIPT_DIR/etc \
+    UID=$UID \
+    GID=$GID \
+    DOCKER_GID=$DOCKER_GID \
+    SAPPORO_WEB_DEBUG=${SAPPORO_WEB_DEBUG:-True} \
+    SAPPORO_WEB_PORT=${SAPPORO_WEB_PORT:-1121} \
+    SAPPORO_WEB_LOG_LEVEL=${SAPPORO_WEB_LOG_LEVEL:-DEBUG} \
+    SAPPORO_WEB_TIMEZONE=${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo} \
+    SAPPORO_WEB_LANGUAGE_CODE=${SAPPORO_WEB_LANGUAGE_CODE:-en} \
+    SAPPORO_WEB_ENABLE_USER_SIGNUP=${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True} \
+    docker-compose -f $DOCKER_COMPOSE_DEV_FILE up -d
+  printf "\nPlease accsess in your brouwser:\n\n"
+  echo "    http://localhost:${SAPPORO_WEB_PORT:-1121}/"
+  printf "\n"
+  printf "Finish SAPPORO-web dev up...\n"
+  exit 0
 }
 
-while [ $# -gt 0 ]; do
-  case $1 in
-    "-h" | "--help" )
-      usage
-      exit 1
-      ;;
-    * )
-      usage
-      exit 1
-      ;;
-  esac
-done
-
-DOCKER_COMPOSE_CONFIG_FILE=$(cd $(dirname $0)/.. && pwd)/docker-compose.yml
-
-echo "Start web-down..."
-docker-compose -f ${DOCKER_COMPOSE_CONFIG_FILE} down
-echo "Finish web-down..."
-
-
-
----
-
-
-#!/bin/bash
-cd `dirname $0`
-CMDNAME=`basename $0`
-
-function usage () {
-  cat << EOS
-Usage: $CMDNAME [Option]...
-Script to up SAPPORO-web.
-
-Option:
-  -h, --help                  Print usage.
-  -l, --log-level INFO|DEBUG  Set log level. (default INFO)
-  -p, --port PORT             Set the host TCP/IP port. (default 1121)
-  -t, --timezone TIMEZONE     Set the timezone. (default Asia/Tokyo)
-  --log-dir ABS_PATH          Set log dir. (default SAPPORO-web/log)
-  --user-signup TRUE|FALSE    Enable user signup. (default True)
-EOS
+function web_dev_create_super_user() {
+  check_docker
+  check_docker_compose
+  cd $SCRIPT_DIR/etc
+  printf "Start SAPPORO-web dev create suepr user...\n"
+  PWD=$SCRIPT_DIR/etc \
+    UID=$UID \
+    GID=$GID \
+    DOCKER_GID=$DOCKER_GID \
+    docker-compose \
+    -f $DOCKER_COMPOSE_DEV_FILE \
+    exec \
+    -u $UID:$GID \
+    app \
+    python3 /opt/SAPPORO/SAPPORO-web/src/manage.py createsuperuser
+  printf "Finish SAPPORO-web dev create suepr user...\n"
+  exit 0
 }
 
-FLG_USER_SIGNUP=True
+function web_dev_down() {
+  check_docker
+  check_docker_compose
+  cd $SCRIPT_DIR/etc
+  printf "Start SAPPORO-web dev down...\n"
+  docker-compose -f $DOCKER_COMPOSE_DEV_FILE down
+  printf "Finish SAPPORO-web dev down...\n"
+  exit 0
+}
 
-while [ $# -gt 0 ]; do
+function web_dev_clean() {
+  printf "Start SAPPORO-web dev clean...\n"
+  rm -rf $SCRIPT_DIR/log/app/*
+  rm -rf $SCRIPT_DIR/src/app/migrations/*
+  rm -rf $SCRIPT_DIR/src/config/secret_key.txt
+  rm -rf $SCRIPT_DIR/src/db.sqlite3
+  rm -rf $SCRIPT_DIR/src/static/*
+  find $SCRIPT_DIR/src -type d | grep pycache | xargs rm -rf
+  printf "Finish SAPPORO-web dev clean...\n"
+  exit 0
+}
+
+function web_dev_freeze() {
+  check_docker
+  printf "Start SAPPORO-web dev freeze...\n"
+  docker run -d --rm \
+    --workdir /opt/SAPPORO/SAPPORO-web/etc \
+    -v $SCRIPT_DIR/etc/requirements.txt:/opt/SAPPORO/SAPPORO-web/etc/requirements.txt \
+    -u $UID:$GID \
+    --name sapporo-web-dev-freeze \
+    python:slim \
+    tail -f /dev/null
+  docker exec \
+    -u 0:0 \
+    sapporo-web-dev-freeze \
+    sh -c "
+apt update &&
+apt install -y build-essential curl iproute2 jq netcat tree &&
+pip install -U pip wheel setuptools
+pip install $PIP_PACKAGES"
+  docker exec \
+    -u $UID:$GID \
+    sapporo-web-dev-freeze \
+    sh -c "
+pip freeze > requirements.txt"
+  docker kill sapporo-web-dev-freeze
+  printf "Finish SAPPORO-web dev freeze...\n"
+  exit 0
+}
+
+function web_dev_test() {
+  check_docker
+  printf "Start SAPPORO-web dev test...\n"
+  mkdir -p $SCRIPT_DIR/etc/coverage_html
+  DOCKER_IMAGE=$(grep "image: suecharo/sapporo-web" $DOCKER_COMPOSE_FILE | sed -e "s/    image: //g")
+  docker run -d --rm \
+    --workdir /opt/SAPPORO/SAPPORO-web/etc \
+    -v $SCRIPT_DIR/etc:/opt/SAPPORO/SAPPORO-web/etc \
+    -u $UID:$GID \
+    --name sapporo-web-dev-test \
+    $DOCKER_IMAGE \
+    tail -f /dev/null
+  docker exec \
+    -u $UID:$GID \
+    sapporo-web-dev-test \
+    coverage run /opt/SAPPORO/SAPPORO-web/src/manage.py test app
+  docker exec \
+    -u $UID:$GID \
+    sapporo-web-dev-test \
+    coverage report
+  docker exec \
+    -u $UID:$GID \
+    sapporo-web-dev-test \
+    coverage html
+  docker kill sapporo-web-dev-test
+  printf "Finish SAPPORO-web dev test...\n"
+  exit 0
+}
+
+function web_dev_build() {
+  check_docker
+  printf "Start SAPPORO-web dev build...\n"
+  docker build --no-cache -t sucahro/sapporo-web:$1 .
+  printf "Finish SAPPORO-web dev build...\n"
+  exit 0
+}
+
+function web_dev() {
+  if [[ $# == 0 ]]; then
+    show_dev_usage
+    exit 1
+  fi
+
+  while [[ $# > 0 ]]; do
+    case $1 in
+    "-h" | "--help")
+      shift 1
+      if [[ $# -ne 0 ]]; then
+        printf "[FATAL] Unexpected Option or Args: $1\n\n"
+        show_dev_usage
+        exit 1
+      fi
+      show_dev_usage
+      exit 0
+      ;;
+    "up")
+      shift 1
+      web_dev_up $@
+      ;;
+    "create-super-user")
+      shift 1
+      if [[ $# -ne 0 ]]; then
+        printf "[FATAL] Unexpected Option or Args: $1\n\n"
+        show_dev_usage
+        exit 1
+      fi
+      web_dev_create_super_user
+      ;;
+    "down")
+      shift 1
+      if [[ $# -ne 0 ]]; then
+        printf "[FATAL] Unexpected Option or Args: $1\n\n"
+        show_dev_usage
+        exit 1
+      fi
+      web_dev_down
+      ;;
+    "clean")
+      shift 1
+      if [[ $# -ne 0 ]]; then
+        printf "[FATAL] Unexpected Option or Args: $1\n\n"
+        show_dev_usage
+        exit 1
+      fi
+      web_dev_clean
+      ;;
+    "freeze")
+      shift 1
+      if [[ $# -ne 0 ]]; then
+        printf "[FATAL] Unexpected Option or Args: $1\n\n"
+        show_dev_usage
+        exit 1
+      fi
+      web_dev_freeze
+      ;;
+    "build")
+      shift 1
+      if [[ $# -ne 1 ]]; then
+        show_dev_usage
+        exit 1
+      fi
+      web_dev_build $1
+      ;;
+    "test")
+      shift 1
+      if [[ $# -ne 0 ]]; then
+        printf "[FATAL] Unexpected Option or Args: $1\n\n"
+        show_dev_usage
+        exit 1
+      fi
+      web_dev_test
+      ;;
+    -*)
+      printf "[FATAL] Unexpected Option: $1\n\n"
+      show_dev_usage
+      exit 1
+      ;;
+    *)
+      printf "[FATAL] Unexpected Args: $1\n\n"
+      show_dev_usage
+      exit 1
+      ;;
+    esac
+  done
+}
+
+if [[ $# == 0 ]]; then
+  show_base_usage
+  exit 1
+fi
+
+while [[ $# > 0 ]]; do
   case $1 in
-    "-h" | "--help" )
-      usage
+  "-h" | "--help")
+    shift 1
+    if [[ $# -ne 0 ]]; then
+      printf "[FATAL] Unexpected Option or Args: $1\n\n"
+      show_base_usage
       exit 1
-      ;;
-    "-l" | "--log-level" )
-      if [ -z $2 ] || [ ${2::1} = "-" ]; then
-        usage
-        exit 1
-      fi
-      ARG_LOG_LEVEL=$2
-      if [ "$ARG_LOG_LEVEL" = "INFO" ] || [ $ARG_LOG_LEVEL = "DEBUG" ]; then
-        :
-      else
-        usage
-        exit 1
-      fi
-      shift 2
-      ;;
-    "-p" | "--port" )
-      if [ -z $2 ] || [ ${2::1} = "-" ]; then
-        usage
-        exit 1
-      fi
-      ARG_PORT=$2
-      expr $ARG_PORT + 1 > /dev/null 2>&1
-      if [ $? -ge 2 ]; then
-        usage
-        exit 1
-      fi
-      if [ $ARG_PORT -lt 1 ]; then
-        usage
-        exit 1
-      fi
-      shift 2
-      ;;
-    "-t" | "--timezone" )
-      if [ -z $2 ] || [ ${2::1} = "-" ]; then
-        usage
-        exit 1
-      fi
-      ARG_TIMEZONE=$2
-      shift 2
-      ;;
-    "--log-dir" )
-      if [ -z $2 ] || [ ${2::1} = "-" ]; then
-        usage
-        exit 1
-      fi
-      ARG_LOG_DIR=$2
-      if [ "${ARG_LOG_DIR::1}" != "/" ]; then
-        usage
-        exit 1
-      fi
-      shift 2
-      ;;
-    "--user-signup" )
-      if [ -z $2 ] || [ ${2::1} = "-" ]; then
-        usage
-        exit 1
-      fi
-      ARG_USER_SIGNUP=$2
-      if [ "$ARG_USER_SIGNUP" = "TRUE" ]; then
-        FLG_USER_SIGNUP=True
-      elif [ $ARG_USER_SIGNUP = "FALSE" ]; then
-        FLG_USER_SIGNUP=False
-      else
-        usage
-        exit 1
-      fi
-      shift 2
-      ;;
-    * )
-      usage
+    fi
+    show_base_usage
+    exit 0
+    ;;
+  "-v" | "--version")
+    shift 1
+    if [[ $# -ne 0 ]]; then
+      printf "[FATAL] Unexpected Option or Args: $1\n\n"
+      show_base_usage
       exit 1
-      ;;
+    fi
+    show_version
+    exit 0
+    ;;
+  "up")
+    shift 1
+    web_up $@
+    ;;
+  "create-super-user")
+    shift 1
+    if [[ $# -ne 0 ]]; then
+      printf "[FATAL] Unexpected Option or Args: $1\n\n"
+      show_base_usage
+      exit 1
+    fi
+    web_create_super_user
+    ;;
+  "down")
+    shift 1
+    if [[ $# -ne 0 ]]; then
+      printf "[FATAL] Unexpected Option or Args: $1\n\n"
+      show_base_usage
+      exit 1
+    fi
+    web_down
+    ;;
+  "clean")
+    shift 1
+    if [[ $# -ne 0 ]]; then
+      printf "[FATAL] Unexpected Option or Args: $1\n\n"
+      show_base_usage
+      exit 1
+    fi
+    web_clean
+    ;;
+  "dev")
+    shift 1
+    web_dev $@
+    ;;
+  -*)
+    printf "[FATAL] Unexpected Option: $1\n\n"
+    show_base_usage
+    exit 1
+    ;;
+  *)
+    printf "[FATAL] Unexpected Args: $1\n\n"
+    show_base_usage
+    exit 1
+    ;;
   esac
 done
-
-if [ -z $ARG_LOG_LEVEL ]; then
-  ARG_LOG_LEVEL="INFO"
-fi
-if [ -z $ARG_PORT ]; then
-  ARG_PORT=1121
-fi
-if [ -z $ARG_TIMEZONE ]; then
-  ARG_TIMEZONE="Asia/Tokyo"
-fi
-if [ -z $ARG_LOG_DIR ]; then
-  ARG_LOG_DIR="./log"
-fi
-
-DOCKER_BIN_PATH=`which docker`
-DOCKER_COMPOSE_CONFIG_FILE=$(cd $(dirname $0)/.. && pwd)/docker-compose.yml
-
-echo "Start web-up..."
-cat << EOS
-DOCKER_BIN: ${DOCKER_BIN_PATH}
-ARG_LOG_LEVEL: ${ARG_LOG_LEVEL}
-ARG_PORT: ${ARG_PORT}
-ARG_TIMEZONE: ${ARG_TIMEZONE}
-ARG_LOG_DIR: ${ARG_LOG_DIR}
-FLG_USER_SIGNUP: ${FLG_USER_SIGNUP}
-EOS
-
-if [ ! $(docker network ls | awk '{print $2}' | grep '^sapporo-network$' | wc -l) -eq 1 ]; then
-  docker network create sapporo-network
-fi
-
-cat << EOS > ${DOCKER_COMPOSE_CONFIG_FILE}
-version: "3"
-services:
-  app:
-    image: suecharo/sapporo-web:v0.3.5
-    container_name: sapporo-web-app
-    depends_on:
-      - database
-    restart: always
-    volumes:
-      - ./SAPPORO-web:/opt/SAPPORO-web/SAPPORO-web
-      - ./config:/opt/SAPPORO-web/config
-      - ${ARG_LOG_DIR}:/opt/SAPPORO-web/log
-    networks:
-      - sapporo
-    environment:
-      - LOG_LEVEL=${ARG_LOG_LEVEL} # DEBUG or INFO
-      - LANGUAGE_CODE=en
-      - TIME_ZONE=${ARG_TIMEZONE}
-      - ENABLE_USER_SIGNUP=${FLG_USER_SIGNUP}
-      - POSTGRES_USER=sapporo-web-user
-      - POSTGRES_PASSWORD=sapporo-web-passwd
-      - POSTGRES_DB=sapporo-web
-      - POSTGRES_PORT=5432
-    command: ["/bin/bash", "/opt/SAPPORO-web/entry_point.sh"]
-  web:
-    image: nginx:stable-alpine
-    container_name: sapporo-web-web
-    depends_on:
-      - app
-    restart: always
-    volumes:
-      - ./config/nginx.conf:/etc/nginx/nginx.conf
-      - ./config:/opt/SAPPORO-web/config
-      - ${ARG_LOG_DIR}:/opt/SAPPORO-web/log
-      - ./SAPPORO-web/static:/opt/SAPPORO-web/SAPPORO-web/static
-    networks:
-      - sapporo
-    ports:
-      - ${ARG_PORT}:80
-  database:
-    image: postgres:alpine
-    container_name: sapporo-web-database
-    restart: always
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - sapporo
-    environment:
-      - POSTGRES_USER=sapporo-web-user
-      - POSTGRES_PASSWORD=sapporo-web-passwd
-      - POSTGRES_DB=sapporo-web
-      - POSTGRES_PORT=5432
-
-volumes:
-  postgres-data:
-
-networks:
-  sapporo:
-    external:
-      name: sapporo-network
-EOS
-
-docker-compose -f ${DOCKER_COMPOSE_CONFIG_FILE} up -d
-
-while [ ! -e $(cd $(dirname $0)/.. && pwd)/config/uwsgi.sock ]; do
-  sleep 1s
-  echo "Starting uWSGI process..."
-done
-
-echo "Access http://0.0.0.0:${ARG_PORT}/ in your browser"
-echo "Finish web-up..."
-
-
----
-
-MIGRATE
-
-#!/bin/bash
-python3 /opt/SAPPORO-web/SAPPORO-web/manage.py makemigrations app
-python3 /opt/SAPPORO-web/SAPPORO-web/manage.py migrate
-
----
-
-DEV TEST UP
-
-#!/bin/bash
-rm -rf ../SAPPORO-web/db.sqlite3
-docker-compose -f docker-compose.dev.yml up -d --build
-docker-compose -f docker-compose.dev.yml exec app /bin/bash /opt/SAPPORO-web/test/migrate.sh
-docker-compose -f docker-compose.dev.yml exec app python3 /opt/SAPPORO-web/SAPPORO-web/manage.py createsuperuser
-docker-compose -f docker-compose.dev.yml exec app /bin/bash /opt/SAPPORO-web/test/run_server.sh
-
----
-
-coverage django-allauth django-bootstrap4 django-debug-toolbar Django psycopg2-binary PyYAML uWSGI
-
-cd etc
-docker run -it --rm -v `pwd`:`pwd` python pip3 install coverage django-allauth django-bootstrap4 django-debug-toolbar Django psycopg2-binary PyYAML uWSGI; pip freeze > `pwd`
-
-
-----
-
-RUN run_server
-
-#!/bin/bash
-python3 /opt/SAPPORO-web/SAPPORO-web/manage.py runserver
-
-
----
-
-RUN test
-
-#!/bin/bash
-coverage run /opt/SAPPORO-web/SAPPORO-web/manage.py test app
-coverage report
-coverage html

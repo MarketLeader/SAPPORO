@@ -15,7 +15,7 @@ services:
       - ${PWD}/../workflow-info.yml:/opt/SAPPORO/SAPPORO-service/workflow-info.yml
     environment:
       - DEBUG=${SAPPORO_SERVICE_DEBUG:-True} # Flask debug mode
-      - ENABLE_GET_RUNS=${SAPPORO_SERVICE_ENABLE_GET_RUNS:-False}
+      - ENABLE_GET_RUNS=${SAPPORO_SERVICE_ENABLE_GET_RUNS:-True}
       - ENABLE_TOKEN_AUTH=${SAPPORO_SERVICE_ENABLE_TOKEN_AUTH:-False}
       - LOG_LEVEL=${SAPPORO_SERVICE_LOG_LEVEL:-DEBUG} # DEBUG or INFO
     user: ${UID:-0}:${DOCKER_GID:-999} # Docker group

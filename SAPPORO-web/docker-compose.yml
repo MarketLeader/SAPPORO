@@ -17,7 +17,7 @@ services:
       - POSTGRES_PASSWORD=${SAPPORO_WEB_POSTGRES_PASSWORD:-sapporo-web-passwd}
       - POSTGRES_PORT=${SAPPORO_WEB_POSTGRES_PORT:-5432}
       - POSTGRES_USER=${SAPPORO_WEB_POSTGRES_USER:-sapporo-web-user}
-      - TIME_ZONE=${SAPPORO_WEB_TIME_ZONE:-Asia/Tokyo}
+      - TIMEZONE=${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo}
     user: ${UID:-0}:${GID:-0}
     command: ["entry_point.sh"]
     networks:
@@ -34,7 +34,7 @@ services:
       - ${PWD}/etc/nginx/run:/var/run/nginx
       - ${PWD}/etc/uwsgi:/etc/nginx/uwsgi
       - ${PWD}/log/nginx:/var/log/nginx
-      - ${PWD}/src/static:/opt/SAPPORO/src/static
+      - ${PWD}/src/static:/opt/SAPPORO/SAPPORO-web/src/static
     user: ${UID:-0}:${GID:-0}
     networks:
       - sapporo
