@@ -21,7 +21,8 @@ def parse_cwl_input_params(cwl_file):
             doc: str or None
         }
     """
-    d_cwl_file = yaml.load(cwl_file)    # TODO finx yaml or jason
+    d_cwl_file = yaml.load(
+        cwl_file, Loader=yaml.SafeLoader)    # TODO fix yaml or json
     assert "inputs" in d_cwl_file, "CWL file does not have inputs field."
     input_params = []
     for label, d_values in d_cwl_file["inputs"].items():

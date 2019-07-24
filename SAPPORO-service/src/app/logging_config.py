@@ -2,7 +2,7 @@
 # coding: utf-8
 from copy import deepcopy
 
-from .config import LOG_FILE_PATH
+from .lib.util import LOG_FILE_PATH
 
 TEMPLATE = {
     "version": 1,

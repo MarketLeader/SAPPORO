@@ -153,11 +153,12 @@ class WorkflowPrepareView(LoginRequiredMixin, View):
 
     def load_upload_parameter_file(self, workflow_parameters):
         d_workflow_parameters = dict()
-        d_load_parameters = yaml.load(workflow_parameters)
+        d_load_parameters = yaml.load(
+            workflow_parameters, Loader=yaml.SafeLoader)
         for key, value in d_load_parameters.items():
             if isinstance(value, dict):
                 d_workflow_parameters[key] = value["path"]
             else:
                 d_workflow_parameters[key] = value
-        
+
         return d_workflow_parameters

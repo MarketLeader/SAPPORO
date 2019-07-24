@@ -138,7 +138,7 @@ def get_run_info(run_id):
     with run_dir.joinpath(STATUS_FILE_NAME).open(mode="r") as f:
         run_info["status"] = f.read().strip()
     with run_dir.joinpath(RUN_ORDER_FILE_NAME).open(mode="r") as f:
-        run_order = yaml.load(f)
+        run_order = yaml.load(f, Loader=yaml.SafeLoader)
         run_info.update(run_order)
     with run_dir.joinpath(UPLOAD_URL_FILE_NAME).open(mode="r") as f:
         run_info["upload_url"] = f.read().strip()
@@ -157,7 +157,7 @@ def _update_end_time(run_id):
         run_status = f.read().strip()
     if run_status not in ["QUEUED", "RUNNING"]:
         with run_dir.joinpath(RUN_ORDER_FILE_NAME).open(mode="r") as f:
-            run_order = yaml.load(f)
+            run_order = yaml.load(f, Loader=yaml.SafeLoader)
             run_order["end_time"] = datetime.fromtimestamp(
                 status_file.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
         with run_dir.joinpath(RUN_ORDER_FILE_NAME).open(mode="w") as f:

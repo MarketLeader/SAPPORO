@@ -35,11 +35,11 @@ SUPPORTED_WES_VERSIONS = ["v1.0.0"]
 
 def read_workflow_info():
     with WORKFLOW_INFO_FILE_PATH.open(mode="r") as f:
-        return yaml.load(f)
+        return yaml.load(f, Loader=yaml.SafeLoader)
 
 
 def read_service_info():
     with SERVICE_INFO_FILE_PATH.open(mode="r") as f:
-        data = yaml.load(f)
+        data = yaml.load(f, Loader=yaml.SafeLoader)
     data["supported_wes_versions"] = SUPPORTED_WES_VERSIONS
     return data

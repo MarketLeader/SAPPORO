@@ -468,7 +468,15 @@ function service_dev_test() {
   DOCKER_IMAGE=$(grep "image: suecharo/sapporo-service" $DOCKER_COMPOSE_FILE | sed -e "s/    image: //g")
   docker run -d --rm \
     --workdir /opt/SAPPORO/SAPPORO-service/etc \
+    -v /usr/bin/docker:/usr/bin/docker \
+    -v /var/lib/docker:/var/lib/docker \
+    -v /var/run/docker.sock:/var/run/docker.sock \
     -v $SCRIPT_DIR/etc:/opt/SAPPORO/SAPPORO-service/etc \
+    -v $SCRIPT_DIR/log/app:/opt/SAPPORO/SAPPORO-service/log/app \
+    -v $SCRIPT_DIR/run:/opt/SAPPORO/SAPPORO-service/run \
+    -v $SCRIPT_DIR/service-info.yml:/opt/SAPPORO/SAPPORO-service/service-info.yml \
+    -v $SCRIPT_DIR/src:/opt/SAPPORO/SAPPORO-service/src \
+    -v $SCRIPT_DIR/workflow-info.yml:/opt/SAPPORO/SAPPORO-service/workflow-info.yml \
     -u $UID:$GID \
     --name sapporo-service-dev-test \
     $DOCKER_IMAGE \
