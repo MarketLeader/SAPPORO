@@ -7,6 +7,7 @@
 /SAPPORO-service/src/app/secret_key.txt
 /SAPPORO-service/src/app/token_list.txt
 
+/SAPPORO-web/etc/coverage_html/
 /SAPPORO-web/etc/nginx/cache
 /SAPPORO-web/etc/nginx/run
 /SAPPORO-web/etc/uwsgi/uwsgi.sock

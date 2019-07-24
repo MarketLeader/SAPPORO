@@ -14,13 +14,7 @@ services:
       - LOG_LEVEL=${SAPPORO_WEB_LOG_LEVEL:-DEBUG} # DEBUG or INFO
       - TIMEZONE=${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo}
     user: ${UID:-0}:${GID:-0}
-    command:
-      [
-        "/usr/local/bin/python3",
-        "/opt/SAPPORO/SAPPORO-web/src/manage.py",
-        "runserver",
-        "0.0.0.0:8080",
-      ]
+    command: ["entry_point.dev.sh"]
     networks:
       - sapporo
     ports:

@@ -41,36 +41,36 @@ class UrlResolveTests(TestCase):
         resolver = resolve("/workflows/")
         self.assertEqual(resolver.view_name, "app:workflow_list")
 
-    def test_url_resolves_to_workflow_detail_view(self):
-        resolver = resolve("/workflows/workflow_unique_id/")
-        self.assertEqual(resolver.view_name, "app:workflow_detail")
-        self.assertEqual(
-            resolver.kwargs["workflow_unique_id"], "workflow_unique_id")
+    # def test_url_resolves_to_workflow_detail_view(self):
+    #     resolver = resolve("/workflows/workflow_unique_id/")
+    #     self.assertEqual(resolver.view_name, "app:workflow_detail")
+    #     self.assertEqual(
+    #         resolver.kwargs["workflow_unique_id"], "workflow_unique_id")
 
     def test_url_resolves_to_run_list_view(self):
         resolver = resolve("/runs/")
         self.assertEqual(resolver.view_name, "app:run_list")
 
-    def test_url_resolves_to_run_detail_view(self):
-        resolver = resolve("/runs/run_unique_id/")
-        self.assertEqual(resolver.view_name, "app:run_detail")
-        self.assertEqual(
-            resolver.kwargs["run_unique_id"], "run_unique_id")
+    # def test_url_resolves_to_run_detail_view(self):
+    #     resolver = resolve("/runs/run_unique_id/")
+    #     self.assertEqual(resolver.view_name, "app:run_detail")
+    #     self.assertEqual(
+    #         resolver.kwargs["run_unique_id"], "run_unique_id")
 
-    def test_url_resolves_to_data_list_view(self):
-        resolver = resolve("/data/")
-        self.assertEqual(resolver.view_name, "app:data_list")
+    # def test_url_resolves_to_data_list_view(self):
+    #     resolver = resolve("/data/")
+    #     self.assertEqual(resolver.view_name, "app:data_list")
 
-    def test_url_resolves_to_data_detail_view(self):
-        resolver = resolve("/data/data_unique_id/")
-        self.assertEqual(resolver.view_name, "app:data_detail")
-        self.assertEqual(
-            resolver.kwargs["data_unique_id"], "data_unique_id")
+    # def test_url_resolves_to_data_detail_view(self):
+    #     resolver = resolve("/data/data_unique_id/")
+    #     self.assertEqual(resolver.view_name, "app:data_detail")
+    #     self.assertEqual(
+    #         resolver.kwargs["data_unique_id"], "data_unique_id")
 
-    def test_url_resolves_to_user_detai_view(self):
-        resolver = resolve("/test_user/")
-        self.assertEqual(resolver.view_name, "app:user_home")
-        self.assertEqual(resolver.kwargs["user_name"], "test_user")
+    # def test_url_resolves_to_user_detai_view(self):
+    #     resolver = resolve("/test_user/")
+    #     self.assertEqual(resolver.view_name, "app:user_home")
+    #     self.assertEqual(resolver.kwargs["user_name"], "test_user")
 
 
 class UrlReverseTests(TestCase):
@@ -111,29 +111,29 @@ class UrlReverseTests(TestCase):
         url = reverse("app:workflow_list")
         self.assertEqual(url, "/workflows/")
 
-    def test_reverse_workflow_detail(self):
-        url = reverse("app:workflow_detail", kwargs={
-                      "workflow_unique_id": "workflow_unique_id"})
-        self.assertEqual(url, "/workflows/workflow_unique_id/")
+    # def test_reverse_workflow_detail(self):
+    #     url = reverse("app:workflow_detail", kwargs={
+    #                   "workflow_unique_id": "workflow_unique_id"})
+    #     self.assertEqual(url, "/workflows/workflow_unique_id/")
 
     def test_reverse_run_list(self):
         url = reverse("app:run_list")
         self.assertEqual(url, "/runs/")
 
-    def test_reverse_run_detail(self):
-        url = reverse("app:run_detail", kwargs={
-                      "run_unique_id": "run_unique_id"})
-        self.assertEqual(url, "/runs/run_unique_id/")
+    # def test_reverse_run_detail(self):
+    #     url = reverse("app:run_detail", kwargs={
+    #                   "run_unique_id": "run_unique_id"})
+    #     self.assertEqual(url, "/runs/run_unique_id/")
 
-    def test_reverse_data_list(self):
-        url = reverse("app:data_list")
-        self.assertEqual(url, "/data/")
+    # def test_reverse_data_list(self):
+    #     url = reverse("app:data_list")
+    #     self.assertEqual(url, "/data/")
 
-    def test_reverse_data_detail(self):
-        url = reverse("app:data_detail", kwargs={
-                      "data_unique_id": "data_unique_id"})
-        self.assertEqual(url, "/data/data_unique_id/")
+    # def test_reverse_data_detail(self):
+    #     url = reverse("app:data_detail", kwargs={
+    #                   "data_unique_id": "data_unique_id"})
+    #     self.assertEqual(url, "/data/data_unique_id/")
 
-    def test_reverse_user_detai(self):
-        url = reverse("app:user_home", kwargs={"user_name": "test_user"})
-        self.assertEqual(url, "/test_user/")
+    # def test_reverse_user_detai(self):
+    #     url = reverse("app:user_home", kwargs={"user_name": "test_user"})
+    #     self.assertEqual(url, "/test_user/")

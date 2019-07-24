@@ -460,6 +460,8 @@ function web_dev_test() {
   docker run -d --rm \
     --workdir /opt/SAPPORO/SAPPORO-web/etc \
     -v $SCRIPT_DIR/etc:/opt/SAPPORO/SAPPORO-web/etc \
+    -v $SCRIPT_DIR/src:/opt/SAPPORO/SAPPORO-web/src \
+    -v $SCRIPT_DIR/log/app:/opt/SAPPORO/SAPPORO-web/log/app \
     -u $UID:$GID \
     --name sapporo-web-dev-test \
     $DOCKER_IMAGE \
