@@ -1,16 +1,10 @@
+#!/usr/local/bin/python3
 # coding: utf-8
-from pathlib import Path
-import secrets
 import os
+import secrets
 from distutils.util import strtobool
 
-
-APPLICATION_ROOT = "/"
-JSON_AS_ASCII = False
-JSON_SORT_KEYS = True
-JSONIFY_PRETTYPRINT_REGULAR = True
-LOG_FILE_PATH = Path("/opt/SAPPORO/SAPPORO-service/log/app/flask.log")
-LOG_FILE_PATH.parent.mkdir(parents=True, exist_ok=True)
+from .lib.util import SECRET_KEY_FILE_PATH
 
 
 def str2bool(arg):
@@ -33,9 +27,6 @@ def str2bool(arg):
 
 
 def generate_secret_key():
-    SECRET_KEY_FILE_NAME = "secret_key.txt"
-    SECRET_KEY_FILE_PATH = Path(__file__).absolute(
-    ).parent.joinpath(SECRET_KEY_FILE_NAME)
     if SECRET_KEY_FILE_PATH.exists():
         with SECRET_KEY_FILE_PATH.open(mode="r") as f:
             for line in f.readlines():
@@ -58,10 +49,10 @@ def generate_d_config():
     else:
         d_config["ENV"] = "production"
         d_config["TESTING"] = False
-    d_config["APPLICATION_ROOT"] = APPLICATION_ROOT
-    d_config["JSON_AS_ASCII"] = JSON_AS_ASCII
-    d_config["JSON_SORT_KEYS"] = JSON_SORT_KEYS
-    d_config["JSONIFY_PRETTYPRINT_REGULAR"] = JSONIFY_PRETTYPRINT_REGULAR
+    d_config["APPLICATION_ROOT"] = "/"
+    d_config["JSON_AS_ASCII"] = False
+    d_config["JSON_SORT_KEYS"] = True
+    d_config["JSONIFY_PRETTYPRINT_REGULAR"] = True
     d_config["SECRET_KEY"] = generate_secret_key()
 
     return d_config

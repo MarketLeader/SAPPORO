@@ -1,3 +1,4 @@
+#!/usr/local/bin/python3
 # coding: utf-8
 import logging
 import os
@@ -7,9 +8,7 @@ from secrets import compare_digest
 from flask import abort, jsonify, request
 
 from .config import ENABLE_TOKEN_AUTH, d_config
-from .lib.util import SERVICE_BASE_DIR
-
-root_logger = logging.getLogger()
+from .lib.util import TOKEN_LIST_FILE_PATH
 
 
 def fix_errorhandler(app):
@@ -29,6 +28,7 @@ def fix_errorhandler(app):
     @app.errorhandler(Exception)
     def error_handler_exception(exception):
         import traceback
+        root_logger = logging.getLogger()
         root_logger.error(exception.args[0])
         root_logger.debug(traceback.format_exc())
         response = {
@@ -45,15 +45,13 @@ def fix_errorhandler(app):
 def token_auth(func):
     def wrapper(*args, **kwargs):
         if ENABLE_TOKEN_AUTH:
-            token_list = SERVICE_BASE_DIR.joinpath(
-                "etc").joinpath("token_list.txt")
-            if token_list.exists() is False:
+            if TOKEN_LIST_FILE_PATH.exists() is False:
                 abort(401, "Unauthorized.")
             request_token = request.headers.get("Authorization", None)
             if request_token is None:
                 abort(401, "Authorization Header does not exist.")
             b_auth = False
-            with token_list.open(mode="r") as f:
+            with TOKEN_LIST_FILE_PATH.open(mode="r") as f:
                 for token in f.read().split("\n"):
                     if token == "":
                         continue

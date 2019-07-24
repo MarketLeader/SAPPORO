@@ -1,12 +1,14 @@
+#!/usr/local/bin/python3
 # coding: utf-8
 import requests
-from flask import abort
 from requests.exceptions import RequestException
+
+from flask import abort
 
 from .util import read_workflow_info
 
 
-def read_workflow_setting_file():
+def generate_workflow_list():
     workflow_info = read_workflow_info()
     data = dict()
     data["workflows"] = []

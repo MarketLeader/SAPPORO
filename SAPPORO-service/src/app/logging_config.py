@@ -1,7 +1,8 @@
+#!/usr/local/bin/python3
 # coding: utf-8
-from .config import LOG_FILE_PATH
 from copy import deepcopy
 
+from .config import LOG_FILE_PATH
 
 TEMPLATE = {
     "version": 1,

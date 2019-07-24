@@ -11,10 +11,10 @@ function run_wf() {
 }
 
 function run_cwltool() {
-  echo "RUNNING" > ${status_file}
-  workflow_location=$(cat ${run_order_file} | yq -r '.workflow_location')
-  cwltool --enable-dev --custom-net=host --outdir ${output_dir} ${workflow_location} ${workflow_parameters_file} 1> ${stdout_file} 2> ${stderr_file} || echo "EXECUTOR_ERROR" > ${status_file}
-  echo "COMPLETE" > ${status_file}
+  echo "RUNNING" >$status
+  cwltool --enable-dev --custom-net=host --outdir $output_dir $workflow_location $workflow_parameters 1>$stdout 2>$stderr || echo "EXECUTOR_ERROR" >$status
+  echo "COMPLETE" >$status
+  exit 0
 }
 
 function run_nextflow() {
@@ -49,27 +49,23 @@ function cancel_toil() {
 
 # =============
 
+SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+cd $SCRIPT_DIR
+uuid=$1
+run_dir=$SCRIPT_DIR/run/$(echo ${uuid} | cut -c 1-2)/${uuid}
+output_dir="${run_dir}/output"
+run_order="${run_dir}/run_order.yml"
+workflow="${run_dir}/workflow"
+workflow_parameters="${run_dir}/workflow_parameters"
+status="${run_dir}/status.txt"
+pid_info="${run_dir}/run.pid"
+upload_url="${run_dir}/upload_url.txt"
+stdout="${run_dir}/stdout.log"
+stderr="${run_dir}/stderr.log"
+execution_engine=$(cat ${run_order} | yq -r '.execution_engine_name')
+workflow_location=$(cat ${run_order_file} | yq -r '.workflow_location')
+
 trap 'echo "SYSTEM_ERROR" > ${status_file}' 1 2 3 15
 trap 'cancel' 10
-
-RUN_ORDER_FILE_NAME="run_order.yml"
-WORKFLOW_FILE_NAME="workflow"
-WORKFLOW_PARAMETERS_FILE_NAME="workflow_parameters"
-STATUS_FILE_NAME="status.txt"
-UPLOAD_URL_FILE_NAME="upload_url.txt"
-STDOUT_FILE_NAME="stdout.log"
-STDERR_FILE_NAME="stderr.log"
-
-uuid=$1
-service_base_dir=$(cd $(dirname $0)/.. && pwd)
-run_dir=${service_base_dir}/run/$(echo ${uuid} | cut -c 1-2)/${uuid}
-output_dir=${run_dir}
-run_order_file=${run_dir}/${RUN_ORDER_FILE_NAME}
-workflow_file=${run_dir}/${WORKFLOW_FILE_NAME}
-workflow_parameters_file=${run_dir}/${WORKFLOW_PARAMETERS_FILE_NAME}
-status_file=${run_dir}/${STATUS_FILE_NAME}
-stdout_file=${run_dir}/${STDOUT_FILE_NAME}
-stderr_file=${run_dir}/${STDERR_FILE_NAME}
-execution_engine=$(cat ${run_order_file} | yq -r '.execution_engine_name')
 
 run_wf

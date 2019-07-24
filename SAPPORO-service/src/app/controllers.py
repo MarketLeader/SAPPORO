@@ -1,11 +1,12 @@
+#!/usr/local/bin/python3
 # coding: utf-8
 from flask import Blueprint, abort, jsonify, request
 
 from .config import ENABLE_GET_RUNS
-from .lib.runs import (cancel_run, execute, get_run_info, get_run_status_list,
-                       validate_and_format_post_runs_request)
+from .lib.runs import (cancel_run, execute, generate_run_order, get_run_info,
+                       get_run_status_list, validate_post_runs_request)
 from .lib.util import read_service_info
-from .lib.workflows import read_workflow_setting_file
+from .lib.workflows import generate_workflow_list
 from .util import token_auth
 
 bp_app = Blueprint("app", __name__)
@@ -23,7 +24,7 @@ def get_service_info():
 @bp_app.route("/workflows", methods=["GET"])
 @token_auth
 def get_workflows_list():
-    data = read_workflow_setting_file()
+    data = generate_workflow_list()
     response = jsonify(data)
     response.status_code = 200
     return response
@@ -44,8 +45,9 @@ def get_runs():
 @bp_app.route("/runs", methods=["POST"])
 @token_auth
 def post_runs():
-    parameters = validate_and_format_post_runs_request(request)
-    data = execute(parameters)
+    validate_post_runs_request(request)
+    run_order = generate_run_order(request)
+    data = execute(run_order)
     response = jsonify(data)
     response.status_code = 201
     return response

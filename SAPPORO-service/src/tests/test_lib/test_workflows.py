@@ -11,9 +11,9 @@ except:
 
 
 class TestWorkflows(unittest.TestCase):
-    def test_read_workflow_setting_file(self):
-        from app.lib.workflows import read_workflow_setting_file
-        data = read_workflow_setting_file()
+    def test_generate_workflow_list(self):
+        from app.lib.workflows import generate_workflow_list
+        data = generate_workflow_list()
         self.assertIn("workflows", data)
 
     def test_resolve_workflow_file_path(self):
