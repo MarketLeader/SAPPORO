@@ -59,6 +59,6 @@ def generate_d_config():
 
 
 d_config = generate_d_config()
-ENABLE_GET_RUNS = str2bool(os.environ.get("ENABLE_GET_RUNS", False))
-ENABLE_TOKEN_AUTH = str2bool(os.environ.get("ENABLE_TOKEN_AUTH", False))
+GET_RUNS = str2bool(os.environ.get("GET_RUNS", True))
+TOKEN_AUTH = str2bool(os.environ.get("TOKEN_AUTH", False))
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "DEBUG")

@@ -38,7 +38,7 @@ def validate_post_runs_request(request):
     run_order = dict(request.form)
     if "workflow_parameters" not in request.files:
         abort(400, "Workflow parameter file not attached.")
-    for param in ["workflow_parameters", "workflow_name", "execution_engine_name"]:
+    for param in ["workflow_name", "execution_engine_name"]:
         if param not in run_order:
             abort(400, "Param: {} is not included.".format(param))
 
@@ -61,12 +61,12 @@ def generate_run_order(request):
     }
     """
     run_order = deepcopy(dict(request.form))
-    run_order["workflow_parameters"] = request.files["workflow_parameters"].stream.read(
+    run_order["workflow_parameters"] = request.files["workflow_parameters"].stream.read(  # NOQA
     ).decode("utf-8")
-    run_order["workflow_location"], run_order["workflow_version"], run_order["workflow_content"], run_order[
-        "language_type"], run_order["language_version"] = _fetch_workflow_file(run_order["workflow_name"])
+    run_order["workflow_location"], run_order["workflow_version"], run_order["workflow_content"], run_order[  # NOQA
+        "language_type"], run_order["language_version"] = _fetch_workflow_file(run_order["workflow_name"])  # NOQA
     run_order["execution_engine_version"] = _validate_engine(
-        run_order["execution_engine_name"], run_order["language_type"], run_order["language_version"])
+        run_order["execution_engine_name"], run_order["language_type"], run_order["language_version"])  # NOQA
     run_order["start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     run_order["end_time"] = ""
 
@@ -78,7 +78,7 @@ def _fetch_workflow_file(workflow_name):
     for workflow in workflow_info["workflows"]:
         if workflow["workflow_name"] == workflow_name:
             workflow_content = fetch_file(workflow["workflow_location"])
-            return workflow["workflow_location"], workflow["workflow_version"], workflow_content, workflow["language_type"], workflow["language_version"]
+            return workflow["workflow_location"], workflow["workflow_version"], workflow_content, workflow["language_type"], workflow["language_version"]  # NOQA
     abort(400, "Workflow does not exist: {}".format(workflow_name))
 
 
@@ -87,7 +87,7 @@ def _validate_engine(engine, language_type, language_version):
     for workflow_engine in service_info["workflow_engines"]:
         if workflow_engine["engine_name"] == engine:
             for type_version in workflow_engine["workflow_types"]:
-                if type_version["language_type"] == language_type and type_version["language_version"] == language_version:
+                if type_version["language_type"] == language_type and type_version["language_version"] == language_version:  # NOQA
                     return workflow_engine["engine_version"]
     abort(400, "Workflow engine parameter is incorrect.")
 
@@ -180,7 +180,7 @@ def cancel_run(run_id):
         try:
             ps_pid = int(process.split()[0])
             l_command = process.split()[3:]
-        except:
+        except Exception:
             continue
         if ps_pid == pid:
             if "sh" in l_command and str(run_id) in l_command:

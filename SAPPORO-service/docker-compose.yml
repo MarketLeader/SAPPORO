@@ -5,19 +5,21 @@ services:
     container_name: sapporo-service-app
     restart: always
     volumes:
+      - /tmp:/tmp
       - /usr/bin/docker:/usr/bin/docker
       - /var/lib/docker:/var/lib/docker
       - /var/run/docker.sock:/var/run/docker.sock
       - ${PWD}/etc/uwsgi:/opt/SAPPORO/SAPPORO-service/etc/uwsgi
       - ${PWD}/log/app:/opt/SAPPORO/SAPPORO-service/log/app
       - ${PWD}/run:/opt/SAPPORO/SAPPORO-service/run
+      - ${PWD}/run/cache:/.cache
       - ${PWD}/service-info.yml:/opt/SAPPORO/SAPPORO-service/service-info.yml
       - ${PWD}/src:/opt/SAPPORO/SAPPORO-service/src
       - ${PWD}/workflow-info.yml:/opt/SAPPORO/SAPPORO-service/workflow-info.yml
     environment:
       - DEBUG=${SAPPORO_SERVICE_DEBUG:-False} # Flask debug mode
-      - ENABLE_GET_RUNS=${SAPPORO_SERVICE_ENABLE_GET_RUNS:-False}
-      - ENABLE_TOKEN_AUTH=${SAPPORO_SERVICE_ENABLE_TOKEN_AUTH:-False}
+      - GET_RUNS=${SAPPORO_SERVICE_GET_RUNS:-True}
+      - TOKEN_AUTH=${SAPPORO_SERVICE_TOKEN_AUTH:-False}
       - LOG_LEVEL=${SAPPORO_SERVICE_LOG_LEVEL:-INFO} # DEBUG or INFO
     user: ${UID:-0}:${DOCKER_GID:-999} # Docker group
     command: ["uwsgi", "/opt/SAPPORO/SAPPORO-service/etc/uwsgi/uwsgi.ini"]

@@ -13,7 +13,8 @@ TEMPLATE = {
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
         "long": {
-            "format": "[%(asctime)s] %(levelname)s - %(filename)s#%(funcName)s:%(lineno)d: %(message)s",
+            "format": "[%(asctime)s] %(levelname)s - " +
+            "%(filename)s#%(funcName)s:%(lineno)d: %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },

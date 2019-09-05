@@ -12,7 +12,7 @@ function run_wf() {
 
 function run_cwltool() {
   echo "RUNNING" >$status
-  cwltool --enable-dev --custom-net=host --outdir $output_dir $workflow_location $workflow_parameters 1>$stdout 2>$stderr || echo "EXECUTOR_ERROR" >$status
+  cwltool --custom-net=sapporo-network --outdir $run_dir $workflow $workflow_parameters 1>$stdout 2>$stderr || echo "EXECUTOR_ERROR" >$status
   echo "COMPLETE" >$status
   exit 0
 }
@@ -50,9 +50,10 @@ function cancel_toil() {
 # =============
 
 SCRIPT_DIR=$(cd $(dirname $0) && pwd)
-cd $SCRIPT_DIR
+RUN_BASE_DIR=$(cd ${SCRIPT_DIR}/.. && pwd)
 uuid=$1
-run_dir=$SCRIPT_DIR/run/$(echo ${uuid} | cut -c 1-2)/${uuid}
+run_dir=$RUN_BASE_DIR/run/$(echo ${uuid} | cut -c 1-2)/${uuid}
+cd $run_dir
 output_dir="${run_dir}/output"
 run_order="${run_dir}/run_order.yml"
 workflow="${run_dir}/workflow"
@@ -63,7 +64,6 @@ upload_url="${run_dir}/upload_url.txt"
 stdout="${run_dir}/stdout.log"
 stderr="${run_dir}/stderr.log"
 execution_engine=$(cat ${run_order} | yq -r '.execution_engine_name')
-workflow_location=$(cat ${run_order_file} | yq -r '.workflow_location')
 
 trap 'echo "SYSTEM_ERROR" > ${status_file}' 1 2 3 15
 trap 'cancel' 10

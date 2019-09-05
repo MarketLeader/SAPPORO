@@ -8,6 +8,7 @@ RUN apt update && \
     curl \
     iproute2 \
     jq \
+    procps \
     tree
 
 COPY etc/requirements.txt /tmp
@@ -17,10 +18,10 @@ RUN pip install -U pip wheel setuptools && \
     rm -rf /tmp/requirements.txt
 
 # The workflow engine you want to use.
-RUN apt install -y \
-    cwltool && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/*
+# RUN apt install -y \
+#     cwltool && \
+#     apt clean && \
+#     rm -rf /var/lib/apt/lists/*
 
 COPY src /opt/SAPPORO/SAPPORO-service/src
 COPY service-info.yml /opt/SAPPORO/SAPPORO-service

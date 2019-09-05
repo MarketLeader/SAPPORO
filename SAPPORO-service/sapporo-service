@@ -7,14 +7,14 @@ TOKEN_LIST_FILE="$SCRIPT_DIR/src/app/token_list.txt"
 UID=$(id -u)
 GID=$(id -g)
 DOCKER_GID=$(cat /etc/group | grep docker | cut -d ":" -f 3)
-PIP_PACKAGES="coverage Flask PyYAML uWSGI requests yq"
+PIP_PACKAGES="coverage cwltool Flask PyYAML requests uWSGI yq"
 
 function show_base_usage() {
   cat <<EOS
 sapporo-service is a set of management commands for SAPPORO-service.
 
 Usage:
-  sapporo-service up [-p <PORT>] [-l DEBUG|INFO] [-d --debug] [--enable-get-runs] [--enable-token-auth] [-h]
+  sapporo-service up [-p <PORT>] [-l DEBUG|INFO] [-d --debug] [--disable-get-runs] [--enable-token-auth] [-h]
   sapporo-service down
   sapporo-service clean
   sapporo-service token [-h]
@@ -54,14 +54,14 @@ function check_docker_compose() {
 function show_service_up_usage() {
   cat <<EOS
 Usage:
-  sapporo-service up [-p <PORT>] [-l DEBUG|INFO] [--enable-get-runs] [--enable-token-auth] [-h]
+  sapporo-service up [-p <PORT>] [-l DEBUG|INFO] [--disable-get-runs] [--enable-token-auth] [-h]
 
 Option:
   -d, --debug                 Use Flask debug mode (default False).
   -p, --port PORT             Set the host TCP/IP port (default 1122).
   -l, --log-level INFO|DEBUG  Set log level (default INFO).
-  --enable-get-runs           Enable get runs (default False).
-  --enable-token-auth         Enable token auth (default False).
+  --disable-get-runs          Disable get runs.
+  --enable-token-auth         Enable token auth.
   -h, --help                  Print usage.
 EOS
 }
@@ -117,12 +117,12 @@ function service_up() {
       SAPPORO_SERVICE_LOG_LEVEL=$2
       shift 2
       ;;
-    "--enable-get-runs")
-      SAPPORO_SERVICE_ENABLE_GET_RUNS="True"
+    "--disable-get-runs")
+      SAPPORO_SERVICE_GET_RUNS="False"
       shift 1
       ;;
     "--enable-token-auth")
-      SAPPORO_SERVICE_ENABLE_TOKEN_AUTH="True"
+      SAPPORO_SERVICE_TOKEN_AUTH="True"
       shift 1
       ;;
     -*)
@@ -145,8 +145,8 @@ function service_up() {
   Debug              : ${SAPPORO_SERVICE_DEBUG:-False}
   Port               : ${SAPPORO_SERVICE_PORT:-1122}
   Log Level          : ${SAPPORO_SERVICE_LOG_LEVEL:-INFO}
-  Enable Get Runs    : ${SAPPORO_SERVICE_ENABLE_GET_RUNS:-False}
-  Enable Token Auth  : ${SAPPORO_SERVICE_ENABLE_TOKEN_AUTH:-False}
+  Get Runs           : ${SAPPORO_SERVICE_GET_RUNS:-True}
+  Token Auth         : ${SAPPORO_SERVICE_TOKEN_AUTH:-False}
 EOS
   printf "\n"
   if [[ $(docker network ls | grep 'sapporo-network' | wc -l) == 0 ]]; then
@@ -160,8 +160,8 @@ EOS
     SAPPORO_SERVICE_DEBUG=${SAPPORO_SERVICE_DEBUG:-False} \
     SAPPORO_SERVICE_PORT=${SAPPORO_SERVICE_PORT:-1122} \
     SAPPORO_SERVICE_LOG_LEVEL=${SAPPORO_SERVICE_LOG_LEVEL:-INFO} \
-    SAPPORO_SERVICE_ENABLE_GET_RUNS=${SAPPORO_SERVICE_ENABLE_GET_RUNS:-False} \
-    SAPPORO_SERVICE_ENABLE_TOKEN_AUTH=${SAPPORO_SERVICE_ENABLE_TOKEN_AUTH:-False} \
+    SAPPORO_SERVICE_GET_RUNS=${SAPPORO_SERVICE_GET_RUNS:-True} \
+    SAPPORO_SERVICE_TOKEN_AUTH=${SAPPORO_SERVICE_TOKEN_AUTH:-False} \
     docker-compose up -d
   while [[ ! -e "$SCRIPT_DIR/etc/uwsgi/uwsgi.sock" ]]; do
     sleep 2s
@@ -190,7 +190,10 @@ function service_clean() {
   rm -rf $SCRIPT_DIR/etc/uwsgi/uwsgi.sock
   rm -rf $SCRIPT_DIR/log/app/*
   rm -rf $SCRIPT_DIR/log/nginx/*
-  rm -rf $SCRIPT_DIR/run/*
+  for file in $(ls $SCRIPT_DIR/run | grep -v cache); do
+    rm -rf $SCRIPT_DIR/run/$file
+  done
+  rm -rf $SCRIPT_DIR/run/cache/*
   rm -rf $SCRIPT_DIR/src/app/secret_key.txt
   rm -rf $SCRIPT_DIR/src/app/token_list.txt
   find $SCRIPT_DIR/src -type d | grep pycache | xargs rm -rf
@@ -220,10 +223,18 @@ function service_token_generate() {
 
 function service_token_show() {
   printf "Token list:\n\n"
-  while read line; do
-    echo "    $line"
-  done <$TOKEN_LIST_FILE
-  printf "\n"
+  if [[ -e $TOKEN_LIST_FILE ]]; then
+    while read line; do
+      echo "    $line"
+    done <$TOKEN_LIST_FILE
+    printf "\n"
+  else
+    echo "$TOKEN_LIST_FILE does not exist."
+    echo "Please do"
+    printf "\n"
+    echo "$ ./sapporo-service token generate"
+    printf "\n"
+  fi
   exit 0
 }
 
@@ -280,7 +291,7 @@ function service_token() {
 function show_dev_usage() {
   cat <<EOS
 Usage:
-  sapporo-service dev up [-p <PORT>] [-l DEBUG|INFO] [-d --debug] [--enable-get-runs] [--enable-token-auth] [-h]
+  sapporo-service dev up [-p <PORT>] [-l DEBUG|INFO] [-d --debug] [--disable-get-runs] [--enable-token-auth] [-h]
   sapporo-service dev down
   sapporo-service dev clean
   sapporo-service dev freeze
@@ -295,14 +306,14 @@ EOS
 function show_service_dev_up_usage() {
   cat <<EOS
 Usage:
-  sapporo-service dev up [-p <PORT>] [-l DEBUG|INFO] [--enable-get-runs] [--enable-token-auth] [-h]
+  sapporo-service dev up [-p <PORT>] [-l DEBUG|INFO] [--disable-get-runs] [--enable-token-auth] [-h]
 
 Option:
   -d, --debug                 Use Flask debug mode (default True).
   -p, --port PORT             Set the host TCP/IP port (default 1122).
   -l, --log-level INFO|DEBUG  Set log level (default DEBUG).
-  --enable-get-runs           Enable get runs (default True).
-  --enable-token-auth         Enable token auth (default False).
+  --disable-get-runs          Disable get runs.
+  --enable-token-auth         Enable token auth.
   -h, --help                  Print usage.
 EOS
 }
@@ -358,12 +369,12 @@ function service_dev_up() {
       SAPPORO_SERVICE_LOG_LEVEL=$2
       shift 2
       ;;
-    "--enable-get-runs")
-      SAPPORO_SERVICE_ENABLE_GET_RUNS="True"
+    "--disable-get-runs")
+      SAPPORO_SERVICE_GET_RUNS="True"
       shift 1
       ;;
     "--enable-token-auth")
-      SAPPORO_SERVICE_ENABLE_TOKEN_AUTH="True"
+      SAPPORO_SERVICE_TOKEN_AUTH="True"
       shift 1
       ;;
     -*)
@@ -387,8 +398,8 @@ function service_dev_up() {
   Debug              : ${SAPPORO_SERVICE_DEBUG:-True}
   Port               : ${SAPPORO_SERVICE_PORT:-1122}
   Log Level          : ${SAPPORO_SERVICE_LOG_LEVEL:-DEBUG}
-  Enable Get Runs    : ${SAPPORO_SERVICE_ENABLE_GET_RUNS:-True}
-  Enable Token Auth  : ${SAPPORO_SERVICE_ENABLE_TOKEN_AUTH:-False}
+  Get Runs           : ${SAPPORO_SERVICE_GET_RUNS:-True}
+  Token Auth         : ${SAPPORO_SERVICE_TOKEN_AUTH:-False}
 EOS
   printf "\n"
   if [[ $(docker network ls | grep 'sapporo-network' | wc -l) == 0 ]]; then
@@ -402,8 +413,8 @@ EOS
     SAPPORO_SERVICE_DEBUG=${SAPPORO_SERVICE_DEBUG:-True} \
     SAPPORO_SERVICE_PORT=${SAPPORO_SERVICE_PORT:-1122} \
     SAPPORO_SERVICE_LOG_LEVEL=${SAPPORO_SERVICE_LOG_LEVEL:-DEBUG} \
-    SAPPORO_SERVICE_ENABLE_GET_RUNS=${SAPPORO_SERVICE_ENABLE_GET_RUNS:-True} \
-    SAPPORO_SERVICE_ENABLE_TOKEN_AUTH=${SAPPORO_SERVICE_ENABLE_TOKEN_AUTH:-False} \
+    SAPPORO_SERVICE_GET_RUNS=${SAPPORO_SERVICE_GET_RUNS:-True} \
+    SAPPORO_SERVICE_TOKEN_AUTH=${SAPPORO_SERVICE_TOKEN_AUTH:-False} \
     docker-compose -f $DOCKER_COMPOSE_DEV_FILE up -d
   printf "\nPlease try:\n\n"
   echo "    $ curl -X GET localhost:${SAPPORO_SERVICE_PORT:-1122}/service-info"
@@ -425,7 +436,10 @@ function service_dev_down() {
 function service_dev_clean() {
   printf "Start SAPPORO-service dev clean...\n"
   rm -rf $SCRIPT_DIR/log/app/*
-  rm -rf $SCRIPT_DIR/run/*
+  for file in $(ls $SCRIPT_DIR/run | grep -v cache); do
+    rm -rf $SCRIPT_DIR/run/$file
+  done
+  rm -rf $SCRIPT_DIR/run/cache/*
   rm -rf $SCRIPT_DIR/src/app/secret_key.txt
   rm -rf $SCRIPT_DIR/src/app/token_list.txt
   find $SCRIPT_DIR/src -type d | grep pycache | xargs rm -rf
@@ -448,7 +462,7 @@ function service_dev_freeze() {
     sapporo-service-dev-freeze \
     sh -c "
 apt update &&
-apt install -y build-essential curl iproute2 jq tree &&
+apt install -y build-essential curl iproute2 jq procps tree &&
 pip install -U pip wheel setuptools
 pip install $PIP_PACKAGES"
   docker exec \
@@ -501,7 +515,7 @@ function service_dev_test() {
 function service_dev_build() {
   check_docker
   printf "Start SAPPORO-service dev build...\n"
-  docker build --no-cache -t sucahro/sapporo-service:$1 .
+  docker build --no-cache -t suecharo/sapporo-service:$1 .
   printf "Finish SAPPORO-service dev build...\n"
   exit 0
 }

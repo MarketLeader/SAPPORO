@@ -2,7 +2,7 @@
 # coding: utf-8
 from flask import Blueprint, abort, jsonify, request
 
-from .config import ENABLE_GET_RUNS
+from .config import GET_RUNS
 from .lib.runs import (cancel_run, execute, generate_run_order, get_run_info,
                        get_run_status_list, validate_post_runs_request)
 from .lib.util import read_service_info
@@ -33,7 +33,7 @@ def get_workflows_list():
 @bp_app.route("/runs", methods=["GET"])
 @token_auth
 def get_runs():
-    if ENABLE_GET_RUNS:
+    if GET_RUNS:
         data = get_run_status_list()
         response = jsonify(data)
         response.status_code = 200

@@ -7,7 +7,7 @@ from secrets import compare_digest
 
 from flask import abort, jsonify, request
 
-from .config import ENABLE_TOKEN_AUTH, d_config
+from .config import TOKEN_AUTH, d_config
 from .lib.util import TOKEN_LIST_FILE_PATH
 
 
@@ -33,7 +33,8 @@ def fix_errorhandler(app):
         root_logger.error(exception.args[0])
         root_logger.debug(traceback.format_exc())
         response = {
-            "msg": "The server encountered an internal error and was unable to complete your request.",
+            "msg": "The server encountered an internal error and was " +
+            "unable to complete your request.",
             "status_code": 500,
         }
         response = jsonify(response)
@@ -45,7 +46,7 @@ def fix_errorhandler(app):
 
 def token_auth(func):
     def wrapper(*args, **kwargs):
-        if ENABLE_TOKEN_AUTH:
+        if TOKEN_AUTH:
             if TOKEN_LIST_FILE_PATH.exists() is False:
                 abort(401, "Unauthorized.")
             request_token = request.headers.get("Authorization", None)

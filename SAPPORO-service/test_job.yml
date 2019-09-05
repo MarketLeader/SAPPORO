@@ -1,0 +1,9 @@
+s3_upload_dir: service-test # default value of type "string".
+s3_bucket: test # type "string"
+nthreads: 2 # default value of type "int". (optional)
+fastq: # type "File"
+  class: File
+  location: http://sapporo-fileserver-input:8080/small.ERR034597_1.fastq
+endpoint: sapporo-fileserver-output:8080 # default value of type "string".
+aws_secret_access_key: f03f5bf489f7d70318a20f9d2b62fa3d # type "string"
+aws_access_key_id: cc462e4caf49ef61a066c74e40743d8f # type "string"
