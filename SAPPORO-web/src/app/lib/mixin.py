@@ -6,10 +6,12 @@ from django.core.exceptions import PermissionDenied
 
 class MyLoginRequiredMixin(LoginRequiredMixin):
     raise_excrption = True
-    permission_denied_message = "You do not have permission to access this page."
+    permission_denied_message = "You do not have permission to access this page."  # NOQA
 
     def handle_not_authenticated(self):
-        return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
+        return redirect_to_login(self.request.get_full_path(),
+                                 self.get_login_url(),
+                                 self.get_redirect_field_name())
 
     def handle_exception(self):
         raise PermissionDenied(self.get_permission_denied_message())

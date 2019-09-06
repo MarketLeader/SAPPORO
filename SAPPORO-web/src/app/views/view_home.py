@@ -1,6 +1,9 @@
 # coding: utf-8
 from logging import getLogger
 
+from app.forms import AuthenticationFormNoPlaceholder
+from app.models import Run, Service, Workflow
+from config.settings import USER_SIGNUP
 from django.conf import settings
 from django.contrib.auth import login as auth_login
 from django.http import HttpResponseRedirect
@@ -10,10 +13,6 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.generic import View
-
-from app.forms import AuthenticationFormNoPlaceholder
-from app.models import Run, Service, Workflow
-from config.settings import ENABLE_USER_SIGNUP
 
 logger = getLogger("django")
 
@@ -25,8 +24,8 @@ class HomeView(View):
             logger.debug(request.META["REMOTE_ADDR"])
 
         if request.user.is_authenticated:
-            services = Service.objects.filter(deleted=False).order_by("-updated_at")
-            workflows = Workflow.objects.filter(deleted=False).order_by("-updated_at")
+            services = Service.objects.filter(deleted=False).order_by("-updated_at")  # NOQA
+            workflows = Workflow.objects.filter(deleted=False).order_by("-updated_at")  # NOQA
             runs = Run.get_user_recent_runs(request.user.pk)
             for run in runs:
                 run.update_from_service()
@@ -40,7 +39,7 @@ class HomeView(View):
             authentication_form = AuthenticationFormNoPlaceholder()
             context = {
                 "authentication_form": authentication_form,
-                "enable_user_signup": ENABLE_USER_SIGNUP,
+                "user_signup": USER_SIGNUP,
             }
             return render(request, "app/home.html", context)
 
@@ -49,8 +48,7 @@ class HomeView(View):
     @method_decorator(never_cache)
     def post(self, request):
         if request.POST.get("authentication"):
-            authentication_form = AuthenticationFormNoPlaceholder(
-                request, data=request.POST)
+            authentication_form = AuthenticationFormNoPlaceholder(request, data=request.POST)  # NOQA
             if authentication_form.is_valid():
                 redirect_to = resolve_url(settings.LOGIN_REDIRECT_URL)
                 auth_login(request, authentication_form.get_user())

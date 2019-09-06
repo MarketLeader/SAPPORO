@@ -63,19 +63,19 @@
 #                          DUMMY_SERVICE_INFO["contact_info_url"])
 #         for workflow_engine in d_service["workflow_engines"]:
 #             self.assertIn(workflow_engine["name"], [
-#                           item["name"] for item in DUMMY_SERVICE_INFO["workflow_engines"]])
+#                           item["name"] for item in DUMMY_SERVICE_INFO["workflow_engines"]])  # NOQA
 #             self.assertIn(workflow_engine["version"], [
-#                           item["version"] for item in DUMMY_SERVICE_INFO["workflow_engines"]])
+#                           item["version"] for item in DUMMY_SERVICE_INFO["workflow_engines"]])  # NOQA
 #             for workflow_type in workflow_engine["workflow_types"]:
 #                 self.assertIn(workflow_type["type"], [
-#                               item_2["type"] for item in DUMMY_SERVICE_INFO["workflow_engines"] for item_2 in item["workflow_types"]])
+#                               item_2["type"] for item in DUMMY_SERVICE_INFO["workflow_engines"] for item_2 in item  # NOQA["workflow_types"]])
 #                 self.assertIn(workflow_type["version"], [
-#                               item_2["version"] for item in DUMMY_SERVICE_INFO["workflow_engines"] for item_2 in item["workflow_types"]])
+#                               item_2["version"] for item in DUMMY_SERVICE_INFO["workflow_engines"] for item_2 in item  # NOQA["workflow_types"]])
 #         for status_count in d_service["status_counts"]:
 #             self.assertIn(status_count["status"], [
-#                           item["status"] for item in DUMMY_SERVICE_INFO["status_counts"]])
+#                           item["status"] for item in DUMMY_SERVICE_INFO["status_counts"]])  # NOQA
 #             self.assertIn(status_count["count"], [
-#                           item["count"] for item in DUMMY_SERVICE_INFO["status_counts"]])
+#                           item["count"] for item in DUMMY_SERVICE_INFO["status_counts"]])  # NOQA
 
 #     def test_get_workflows_dict_response(self):
 #         service = Service()
@@ -166,7 +166,7 @@
 #         supported_wes_versions = SupportedWesVersion.objects.filter(
 #             service__name="TestService")
 #         for supported_wes_version in supported_wes_versions:
-#             self.assertIn("Supported Wes Version:", str(supported_wes_version))
+#             self.assertIn("Supported Wes Version:", str(supported_wes_version))  # NOQA
 
 
 # class StatusCountTests(TestCase):
@@ -186,9 +186,9 @@
 #             DUMMY_SERVICE_INFO["status_counts"]))
 #         for status_count in status_counts:
 #             self.assertIn(status_count.status,
-#                           [item["status"] for item in DUMMY_SERVICE_INFO["status_counts"]])
+#                           [item["status"] for item in DUMMY_SERVICE_INFO["status_counts"]])  # NOQA
 #             self.assertIn(status_count.count,
-#                           [item["count"] for item in DUMMY_SERVICE_INFO["status_counts"]])
+#                           [item["count"] for item in DUMMY_SERVICE_INFO["status_counts"]])  # NOQA
 #             self.assertIsInstance(status_count.created_at, datetime)
 #             self.assertIsInstance(status_count.updated_at, datetime)
 

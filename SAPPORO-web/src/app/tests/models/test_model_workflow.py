@@ -52,13 +52,13 @@
 #                 workflow.workflow_type.version, d_w["version"])
 #             self.assertEqual(workflow.description,
 #                              d_w["description"])
-#             for workflow_parameter in WorkflowParameter.objects.filter(workflow__id=workflow.id):
+#             for workflow_parameter in WorkflowParameter.objects.filter(workflow__id=workflow.id):  # NOQA
 #                 self.assertIn(workflow_parameter.name, [
 #                               item["name"] for item in d_w["parameters"]])
 #                 self.assertIn(workflow_parameter.type, [
 #                               item["type"] for item in d_w["parameters"]])
 #                 self.assertIn(workflow_parameter.description, [
-#                               item["description"] for item in d_w["parameters"]])
+#                               item["description"] for item in d_w["parameters"]])  # NOQA
 
 #     def test_expand_to_dict(self):
 #         self.set_up_db()
@@ -82,11 +82,11 @@
 #                 self.assertIn(workflow_parameter["type"], [
 #                               item["type"] for item in d_w["parameters"]])
 #                 self.assertIn(workflow_parameter["description"], [
-#                               item["description"] for item in d_w["parameters"]])
+#                               item["description"] for item in d_w["parameters"]])  # NOQA
 
 #     def test_return_str(self):
 #         self.set_up_db()
-#         for workflow in Workflow.objects.prefetch_related("workflowparameter_set").all():
+#         for workflow in Workflow.objects.prefetch_related("workflowparameter_set").all():  # NOQA
 #             self.assertIn("Workflow:", str(workflow))
 #             for workflow_parameter in workflow.workflowparameter_set.all():
 #                 self.assertIn("Workflow Paramter:", str(workflow_parameter))

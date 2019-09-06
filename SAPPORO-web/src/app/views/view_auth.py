@@ -1,10 +1,9 @@
 # coding: utf-8
+from app.forms import AuthenticationFormNoPlaceholder, UserCreationForm
+from config.settings import USER_SIGNUP
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-
-from app.forms import AuthenticationFormNoPlaceholder, UserCreationForm
-from config.settings import ENABLE_USER_SIGNUP
 
 
 class SignupView(CreateView):
@@ -15,7 +14,7 @@ class SignupView(CreateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context["enable_user_signup"] = ENABLE_USER_SIGNUP
+        context["user_signup"] = USER_SIGNUP
 
         return context
 
@@ -26,6 +25,6 @@ class LoginNoPlaceholderView(LoginView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context["enable_user_signup"] = ENABLE_USER_SIGNUP
+        context["user_signup"] = USER_SIGNUP
 
         return context

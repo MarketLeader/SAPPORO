@@ -9,12 +9,12 @@ services:
       - ${PWD}/../log/app:/opt/SAPPORO/SAPPORO-web/log/app
     environment:
       - DEBUG=${SAPPORO_WEB_DEBUG:-True} # Django debug mode and Use SQLite
-      - ENABLE_USER_SIGNUP=${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True}
+      - USER_SIGNUP=${SAPPORO_WEB_USER_SIGNUP:-True}
       - LANGUAGE_CODE=${SAPPORO_WEB_LANGUAGE_CODE:-en}
       - LOG_LEVEL=${SAPPORO_WEB_LOG_LEVEL:-DEBUG} # DEBUG or INFO
-      - TIMEZONE=${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo}
+      - TIME_ZONE=${SAPPORO_WEB_TIME_ZONE:-Asia/Tokyo}
     user: ${UID:-0}:${GID:-0}
-    command: ["entry_point.dev.sh"]
+    command: ["entrypoint.sh"]
     networks:
       - sapporo
     ports:

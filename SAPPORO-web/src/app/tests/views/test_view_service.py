@@ -1,9 +1,8 @@
 # coding: utf-8
+from app.models import Service
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
-
-from app.models import Service
 
 
 class ServiceListViewTests(TestCase):

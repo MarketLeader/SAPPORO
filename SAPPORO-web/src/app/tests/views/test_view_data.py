@@ -1,7 +1,7 @@
 # coding: utf-8
-from django.contrib.auth.models import User
-from django.test import Client, TestCase
-from django.urls import reverse
+from django.contrib.auth.models import User  # NOQA
+from django.test import Client, TestCase  # NOQA
+from django.urls import reverse  # NOQA
 
 
 class DataListViewTests(TestCase):

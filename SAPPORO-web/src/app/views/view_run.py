@@ -1,14 +1,13 @@
 # coding: utf-8
 import io
 
+from app.lib.mixin import MyLoginRequiredMixin as LoginRequiredMixin
+from app.lib.requests_wrapper import post_requests_no_data
+from app.models import Run
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import View
-
-from app.lib.mixin import MyLoginRequiredMixin as LoginRequiredMixin
-from app.lib.requests_wrapper import post_requests_no_data
-from app.models import Run
 
 
 class RunListView(LoginRequiredMixin, View):
@@ -31,7 +30,7 @@ class RunDetailView(LoginRequiredMixin, View):
         run.update_from_service()
         context = {
             "run": run,
-            "bool_cancel_button": True if run.status in ["QUEUED", "RUNNING"] else False,
+            "bool_cancel_button": True if run.status in ["QUEUED", "RUNNING"] else False,  # NOQA
         }
 
         return render(request, "app/run_detail.html", context)
@@ -42,12 +41,14 @@ class RunDetailView(LoginRequiredMixin, View):
             raise PermissionDenied
         run.update_from_service()
         if request.POST.get("run_cancel_button"):
-            post_requests_no_data(run.workflow.service.server_scheme, run.workflow.service.server_host,
-                                  "/runs/" + str(run.run_id) + "/cancel", run.workflow.service.server_token)
+            post_requests_no_data(run.workflow.service.server_scheme,
+                                  run.workflow.service.server_host,
+                                  "/runs/" + str(run.run_id) + "/cancel",
+                                  run.workflow.service.server_token)
             run.update_from_service()
         context = {
             "run": run,
-            "bool_cancel_button": True if run.status in ["QUEUED", "RUNNING"] else False,
+            "bool_cancel_button": True if run.status in ["QUEUED", "RUNNING"] else False,  # NOQA
         }
 
         return render(request, "app/run_detail.html", context)
@@ -62,7 +63,6 @@ class RunDownloadView(LoginRequiredMixin, View):
         content = io.StringIO()
         content.write(run.workflow_parameters)
         response = HttpResponse(content.getvalue(), content_type="text/plain")
-        response["Content-Disposition"] = "filename=workflow_parameters_{}.txt".format(
-            run.run_id)
+        response["Content-Disposition"] = "filename=workflow_parameters_{}.txt".format(run.run_id)  # NOQA
 
         return response

@@ -10,16 +10,16 @@ services:
       - ${PWD}/src:/opt/SAPPORO/SAPPORO-web/src
     environment:
       - DEBUG=${SAPPORO_WEB_DEBUG:-False} # Django debug mode and Use SQLite
-      - ENABLE_USER_SIGNUP=${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True}
       - LANGUAGE_CODE=${SAPPORO_WEB_LANGUAGE_CODE:-en}
       - LOG_LEVEL=${SAPPORO_WEB_LOG_LEVEL:-INFO} # DEBUG or INFO
       - POSTGRES_DB=${SAPPORO_WEB_POSTGRES_DB:-sapporo-web}
       - POSTGRES_PASSWORD=${SAPPORO_WEB_POSTGRES_PASSWORD:-sapporo-web-passwd}
       - POSTGRES_PORT=${SAPPORO_WEB_POSTGRES_PORT:-5432}
       - POSTGRES_USER=${SAPPORO_WEB_POSTGRES_USER:-sapporo-web-user}
-      - TIMEZONE=${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo}
+      - TIME_ZONE=${SAPPORO_WEB_TIME_ZONE:-Asia/Tokyo}
+      - USER_SIGNUP=${SAPPORO_WEB_USER_SIGNUP:-True}
     user: ${UID:-0}:${GID:-0}
-    command: ["entry_point.sh"]
+    command: ["/bin/bash", "entrypoint.uwsgi.sh"]
     networks:
       - sapporo
     depends_on:

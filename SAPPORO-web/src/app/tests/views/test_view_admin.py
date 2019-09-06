@@ -1,9 +1,8 @@
 # coding: utf-8
+from app.models import Service, Workflow  # NOQA
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
-
-from app.models import Service, Workflow
 
 
 class AdminHomeViewTests(TestCase):
@@ -141,7 +140,7 @@ class AdminServiceViewTests(TestCase):
     #     }
     #     response = client.post(reverse("app:admin_service"), params)
     #     self.assertEquals(response.status_code, 200)
-    #     self.assertContains(response, "A form with that name already exists.")
+    #     self.assertContains(response, "A form with that name already exists.")  # NOQA
 
     # def test_post_service_delete_form(self):
     #     client = Client()

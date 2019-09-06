@@ -54,7 +54,7 @@ Option:
   -h, --help                  Print usage.
   -l, --log-level INFO|DEBUG  Set log level. (default INFO)
   -p, --port PORT             Set the host TCP/IP port. (default 1121)
-  -t, --timezone TIMEZONE     Set the timezone. (default Asia/Tokyo)
+  -t, --timezone TIME_ZONE     Set the timezone. (default Asia/Tokyo)
   --log-dir ABS_PATH          Set log dir. (default SAPPORO-web/log)
   --user-signup TRUE|FALSE    Enable user signup. (default True)
 

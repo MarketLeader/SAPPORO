@@ -1,8 +1,7 @@
 # coding: utf-8
-from django.contrib import admin
-
 from app.models import (Run, Service, SupportedWesVersion, Workflow,
                         WorkflowEngine, WorkflowType)
+from django.contrib import admin
 
 admin.site.register(Service)
 admin.site.register(WorkflowEngine)

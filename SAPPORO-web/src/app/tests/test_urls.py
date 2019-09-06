@@ -103,8 +103,7 @@ class UrlReverseTests(TestCase):
         self.assertEqual(url, "/services/")
 
     def test_reverse_service_detail(self):
-        url = reverse("app:service_detail", kwargs={
-                      "service_name": "service_name"})
+        url = reverse("app:service_detail", kwargs={"service_name": "service_name"})  # NOQA
         self.assertEqual(url, "/services/service_name/")
 
     def test_reverse_workflow_list(self):

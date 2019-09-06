@@ -1,9 +1,8 @@
 # coding: utf-8
-from django.contrib.auth.models import User
-from django.forms import ValidationError
+from app.forms import ServiceAdditionForm, UserCreationForm  # NOQA
+from django.contrib.auth.models import User  # NOQA
+from django.forms import ValidationError  # NOQA
 from django.test import TestCase
-
-from app.forms import ServiceAdditionForm, UserCreationForm
 
 
 class UserCreationFormTests(TestCase):

@@ -1,6 +1,6 @@
 # coding: utf-8
-import secrets
 import os
+import secrets
 from distutils.util import strtobool
 from pathlib import Path
 
@@ -26,8 +26,7 @@ def str2bool(arg):
 
 def generate_secret_key():
     SECRET_KEY_FILE_NAME = "secret_key.txt"
-    SECRET_KEY_FILE_PATH = Path(__file__).absolute(
-    ).parent.joinpath(SECRET_KEY_FILE_NAME)
+    SECRET_KEY_FILE_PATH = Path(__file__).absolute().parent.joinpath(SECRET_KEY_FILE_NAME)  # NOQA
     if SECRET_KEY_FILE_PATH.exists():
         with SECRET_KEY_FILE_PATH.open(mode="r") as f:
             for line in f.readlines():
@@ -44,8 +43,8 @@ def generate_secret_key():
 BASE_DIR = Path(__file__).absolute().parent.parent
 DEBUG = str2bool(os.environ.get("DEBUG", True))
 LANGUAGE_CODE = os.environ.get("LANGUAGE_CODE", "en")
-TIMEZONE = os.environ.get("TIMEZONE", "UTC")
-ENABLE_USER_SIGNUP = str2bool(os.environ.get("ENABLE_USER_SIGNUP", True))
+TIME_ZONE = os.environ.get("TIME_ZONE", "UTC")
+USER_SIGNUP = str2bool(os.environ.get("USER_SIGNUP", True))
 LOG_FILE_PATH = str(BASE_DIR.joinpath("../log/app/django.log").resolve())
 
 if DEBUG:
@@ -65,7 +64,7 @@ ALLOWED_HOSTS = ["*"]
 SECRET_KEY = generate_secret_key()
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+USE_TIME_ZONE = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
@@ -141,7 +140,7 @@ else:
             "ENGINE": "django.db.backends.postgresql_psycopg2",
             "NAME": os.environ.get("POSTGRES_DB", "sapporo-web"),
             "USER": os.environ.get("POSTGRES_USER", "sapporo-web-user"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "sapporo-web-passwd"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "sapporo-web-passwd"),  # NOQA
             "HOST": "sapporo-web-database",
             "PORT": int(os.environ.get("POSTGRES_PORT", 5432)),
         }
@@ -149,21 +148,22 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # NOQA
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",  # NOQA
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",  # NOQA
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",  # NOQA
     },
 ]
 
 if DEBUG:
-    INTERNAL_IPS = ["172.22.0.1"]
+    # docker inspect sapporo-network | jq '.[].IPAM.Config | .[].Gateway'
+    INTERNAL_IPS = ["172.18.0.1"]
     MIDDLEWARE += [
         "debug_toolbar.middleware.DebugToolbarMiddleware",
     ]

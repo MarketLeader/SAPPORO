@@ -13,7 +13,7 @@ function show_base_usage() {
 sapporo-web is a set of management commands for SAPPORO-web.
 
 Usage:
-  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIMEZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
+  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIME_ZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
   sapporo-web create-super-user
   sapporo-web down
   sapporo-web clean
@@ -51,15 +51,15 @@ function check_docker_compose() {
 function show_web_up_usage() {
   cat <<EOS
 Usage:
-  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIMEZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
+  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIME_ZONE>] [--language-code <CODE>] [-d --debug] [--disable-user-signup] [-h]
 
 Option:
   -d, --debug                 Use Flask debug mode (default False).
   -p, --port PORT             Set the host TCP/IP port (default 1121).
   -l, --log-level INFO|DEBUG  Set log level (default INFO).
-  -t, --timezone TIMEZONE     Set the timezone (default Asia/Tokyo).
+  -t, --timezone TIME_ZONE     Set the timezone (default Asia/Tokyo).
   --language-code CODE        Set the timezone (default en).
-  --enable-user-signup        Enable user signup (default True).
+  --disable-user-signup       Disable user signup.
   -h, --help                  Print usage.
 EOS
 }
@@ -117,11 +117,11 @@ function web_up() {
       ;;
     "-t" | "--timezone")
       if [[ -z $2 ]]; then
-        printf "[FATAL] Please enter the TIMEZONE.\n\n"
+        printf "[FATAL] Please enter the TIME_ZONE.\n\n"
         show_web_up_usage
         exit 1
       fi
-      SAPPORO_WEB_TIMEZONE=$2
+      SAPPORO_WEB_TIME_ZONE=$2
       shift 2
       ;;
     "--language-code")
@@ -133,8 +133,8 @@ function web_up() {
       SAPPORO_WEB_LANGUAGE_CODE=$2
       shift 2
       ;;
-    "--enable-user-signup")
-      SAPPORO_WEB_ENABLE_USER_SIGNUP="True"
+    "--disable-user-signup")
+      SAPPORO_WEB_USER_SIGNUP="False"
       shift 1
       ;;
     -*)
@@ -157,9 +157,9 @@ function web_up() {
   Debug              : ${SAPPORO_WEB_DEBUG:-False}
   Port               : ${SAPPORO_WEB_PORT:-1121}
   Log Level          : ${SAPPORO_WEB_LOG_LEVEL:-INFO}
-  Timezone           : ${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo}
+  Timezone           : ${SAPPORO_WEB_TIME_ZONE:-Asia/Tokyo}
   Language Code      : ${SAPPORO_WEB_LANGUAGE_CODE:-en}
-  Enable User Signup : ${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True}
+  Enable User Signup : ${SAPPORO_WEB_USER_SIGNUP:-True}
 EOS
   printf "\n"
   if [[ $(docker network ls | grep 'sapporo-network' | wc -l) == 0 ]]; then
@@ -173,9 +173,9 @@ EOS
     SAPPORO_WEB_DEBUG=${SAPPORO_WEB_DEBUG:-False} \
     SAPPORO_WEB_PORT=${SAPPORO_WEB_PORT:-1121} \
     SAPPORO_WEB_LOG_LEVEL=${SAPPORO_WEB_LOG_LEVEL:-INFO} \
-    SAPPORO_WEB_TIMEZONE=${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo} \
+    SAPPORO_WEB_TIME_ZONE=${SAPPORO_WEB_TIME_ZONE:-Asia/Tokyo} \
     SAPPORO_WEB_LANGUAGE_CODE=${SAPPORO_WEB_LANGUAGE_CODE:-en} \
-    SAPPORO_WEB_ENABLE_USER_SIGNUP=${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True} \
+    SAPPORO_WEB_USER_SIGNUP=${SAPPORO_WEB_USER_SIGNUP:-True} \
     docker-compose up -d
   while [[ ! -e "$SCRIPT_DIR/etc/uwsgi/uwsgi.sock" ]]; do
     sleep 2s
@@ -233,7 +233,7 @@ function web_clean() {
 function show_dev_usage() {
   cat <<EOS
 Usage:
-  sapporo-web dev up [-p <PORT>] [-l DEBUG|INFO] [-t <TIMEZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
+  sapporo-web dev up [-p <PORT>] [-l DEBUG|INFO] [-t <TIME_ZONE>] [--language-code <CODE>] [-d --debug] [--disable-user-signup] [-h]
   sapporo-web dev create-super-user
   sapporo-web dev down
   sapporo-web dev clean
@@ -249,15 +249,15 @@ EOS
 function show_web_dev_up_usage() {
   cat <<EOS
 Usage:
-  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIMEZONE>] [--language-code <CODE>] [-d --debug] [--enable-user-signup] [-h]
+  sapporo-web up [-p <PORT>] [-l DEBUG|INFO] [-t <TIME_ZONE>] [--language-code <CODE>] [-d --debug] [--disable-user-signup] [-h]
 
 Option:
   -d, --debug                 Use Flask debug mode (default True).
   -p, --port PORT             Set the host TCP/IP port (default 1121).
   -l, --log-level INFO|DEBUG  Set log level (default DEBUG).
-  -t, --timezone TIMEZONE     Set the timezone (default Asia/Tokyo).
+  -t, --timezone TIME_ZONE     Set the timezone (default Asia/Tokyo).
   --language-code CODE        Set the timezone (default en).
-  --enable-user-signup        Enable user signup (default True).
+  --disable-user-signup       Enable user signup.
   -h, --help                  Print usage.
 EOS
 }
@@ -315,11 +315,11 @@ function web_dev_up() {
       ;;
     "-t" | "--timezone")
       if [[ -z $2 ]]; then
-        printf "[FATAL] Please enter the TIMEZONE.\n\n"
+        printf "[FATAL] Please enter the TIME_ZONE.\n\n"
         show_web_up_usage
         exit 1
       fi
-      SAPPORO_WEB_TIMEZONE=$2
+      SAPPORO_WEB_TIME_ZONE=$2
       shift 2
       ;;
     "--language-code")
@@ -331,8 +331,8 @@ function web_dev_up() {
       SAPPORO_WEB_LANGUAGE_CODE=$2
       shift 2
       ;;
-    "--enable-user-signup")
-      SAPPORO_WEB_ENABLE_USER_SIGNUP="True"
+    "--disable-user-signup")
+      SAPPORO_WEB_USER_SIGNUP="False"
       shift 1
       ;;
     -*)
@@ -356,9 +356,9 @@ function web_dev_up() {
   Debug              : ${SAPPORO_WEB_DEBUG:-True}
   Port               : ${SAPPORO_WEB_PORT:-1121}
   Log Level          : ${SAPPORO_WEB_LOG_LEVEL:-DEBUG}
-  Timezone           : ${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo}
+  Timezone           : ${SAPPORO_WEB_TIME_ZONE:-Asia/Tokyo}
   Language Code      : ${SAPPORO_WEB_LANGUAGE_CODE:-en}
-  Enable User Signup : ${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True}
+  Enable User Signup : ${SAPPORO_WEB_USER_SIGNUP:-True}
 EOS
   printf "\n"
   if [[ $(docker network ls | grep 'sapporo-network' | wc -l) == 0 ]]; then
@@ -372,9 +372,9 @@ EOS
     SAPPORO_WEB_DEBUG=${SAPPORO_WEB_DEBUG:-True} \
     SAPPORO_WEB_PORT=${SAPPORO_WEB_PORT:-1121} \
     SAPPORO_WEB_LOG_LEVEL=${SAPPORO_WEB_LOG_LEVEL:-DEBUG} \
-    SAPPORO_WEB_TIMEZONE=${SAPPORO_WEB_TIMEZONE:-Asia/Tokyo} \
+    SAPPORO_WEB_TIME_ZONE=${SAPPORO_WEB_TIME_ZONE:-Asia/Tokyo} \
     SAPPORO_WEB_LANGUAGE_CODE=${SAPPORO_WEB_LANGUAGE_CODE:-en} \
-    SAPPORO_WEB_ENABLE_USER_SIGNUP=${SAPPORO_WEB_ENABLE_USER_SIGNUP:-True} \
+    SAPPORO_WEB_USER_SIGNUP=${SAPPORO_WEB_USER_SIGNUP:-True} \
     docker-compose -f $DOCKER_COMPOSE_DEV_FILE up -d
   printf "\nPlease accsess in your brouwser:\n\n"
   echo "    http://localhost:${SAPPORO_WEB_PORT:-1121}/"
@@ -486,7 +486,7 @@ function web_dev_test() {
 function web_dev_build() {
   check_docker
   printf "Start SAPPORO-web dev build...\n"
-  docker build --no-cache -t sucahro/sapporo-web:$1 .
+  docker build --no-cache -t suecharo/sapporo-web:$1 .
   printf "Finish SAPPORO-web dev build...\n"
   exit 0
 }

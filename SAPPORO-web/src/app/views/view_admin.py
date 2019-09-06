@@ -1,11 +1,10 @@
 # coding: utf-8
-from django.core.exceptions import PermissionDenied
-from django.shortcuts import render
-from django.views.generic import View
-
 from app.forms import ServiceAdditionForm
 from app.lib.mixin import MyLoginRequiredMixin as LoginRequiredMixin
 from app.models import Service
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import render
+from django.views.generic import View
 
 
 class AdminHomeView(LoginRequiredMixin, View):
@@ -50,8 +49,7 @@ class AdminServiceView(LoginRequiredMixin, View):
         return self.general_render(request, service_addition_form)
 
     def general_render(self, request, service_addition_form):
-        services = Service.objects.filter(deleted=False).order_by("-updated_at").prefetch_related(
-            "workflow_engines", "workflows")
+        services = Service.objects.filter(deleted=False).order_by("-updated_at").prefetch_related("workflow_engines", "workflows")  # NOQA
         context = {
             "services": services,
             "service_addition_form": service_addition_form,
