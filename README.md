@@ -10,7 +10,7 @@ SAPPORO is a workflow and individual task execution system. It is also useful fo
 
 [Wikipedia - Batch Computing](https://en.wikipedia.org/wiki/Batch_processing)
 
-> the scripted running of one or more programs, as directed by Job Control Language, with no human interaction other than, 
+> the scripted running of one or more programs, as directed by Job Control Language, with no human interaction other than,
 
 Batch computing is used in the following various areas.
 
@@ -61,10 +61,10 @@ You can register multiple SAPPORO-service in one SAPPORO-web or register one SAP
 
 For details, please refer to each README.
 
-- [SAPPORO-web - README](https://github.com/suecharo/SAPPORO/blob/master/SAPPORO-web/README.md)
-- [SAPPORO-service - README](https://github.com/suecharo/SAPPORO/blob/master/SAPPORO-service/README.md)
-- [SAPPORO-fileserver - README](https://github.com/suecharo/SAPPORO/blob/master/SAPPORO-fileserver/README.md)
+- [SAPPORO-web - README](https://github.com/ddbj/SAPPORO-web/blob/master/README.md)
+- [SAPPORO-service - README](https://github.com/ddbj/SAPPORO-service/blob/master/README.md)
+- [SAPPORO-fileserver - README](https://github.com/ddbj/SAPPORO-fileserver/blob/master/README.md)
 
 ## License
 
-SAPPORO is released under the [Apache 2.0 license](https://github.com/suecharo/SAPPORO/blob/master/LICENSE).
+SAPPORO is released under the [Apache 2.0 license](https://github.com/ddbj/SAPPORO/blob/master/LICENSE).
