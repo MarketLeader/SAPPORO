@@ -1,0 +1,9 @@
+[submodule "SAPPORO-web"]
+	path = SAPPORO-web
+	url = git@github.com:ddbj/SAPPORO-web.git
+[submodule "SAPPORO-service"]
+	path = SAPPORO-service
+	url = git@github.com:ddbj/SAPPORO-service.git
+[submodule "SAPPORO-fileserver"]
+	path = SAPPORO-fileserver
+	url = git@github.com:ddbj/SAPPORO-fileserver.git

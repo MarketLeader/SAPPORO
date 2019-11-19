@@ -1,25 +1,79 @@
-SAPPORO-service/config/token_list.txt
-SAPPORO-service/config/uwsgi.sock
-SAPPORO-service/log/
-SAPPORO-service/run/
-SAPPORO-service/SAPPORO-service/app/local_config.py
+### https://raw.github.com/github/gitignore/0d7600fc30271e84deb4b52b3562ee57a350567b/Global/Linux.gitignore
 
-SAPPORO-web/config/uwsgi.sock
-SAPPORO-web/log/
-SAPPORO-web/SAPPORO-web/app/migrations/
-SAPPORO-web/SAPPORO-web/config/local_settings.py
-SAPPORO-web/SAPPORO-web/static/
+*~
 
-SAPPORO-fileserver/data/
-SAPPORO-fileserver/log/
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
 
-!.gitkeep
+# KDE directory preferences
+.directory
 
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.coverage
-.coverage.*
-db.sqlite3
-migrations/
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+
+### https://raw.github.com/github/gitignore/0d7600fc30271e84deb4b52b3562ee57a350567b/Global/macOS.gitignore
+
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+### https://raw.github.com/github/gitignore/0d7600fc30271e84deb4b52b3562ee57a350567b/Global/Windows.gitignore
+
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+
+### https://raw.github.com/github/gitignore/0d7600fc30271e84deb4b52b3562ee57a350567b/Global/VisualStudioCode.gitignore
+
+.vscode/*
