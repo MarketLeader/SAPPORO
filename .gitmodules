@@ -1,0 +1,3 @@
+[submodule "SAPPORO-web"]
+	path = SAPPORO-web
+	url = git@github.com:ddbj/SAPPORO-web.git
