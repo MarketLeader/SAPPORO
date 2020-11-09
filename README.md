@@ -1,69 +1,73 @@
 # SAPPORO
 
-SAPPORO is a workflow and individual task execution system. It is also useful for continuous testing of workflows.
-
-[Japanese document](https://hackmd.io/s/Syq0q0o8N)
+Sapporo is a workflow execution system (WES) that provides the [GA4GH WES Standard](https://github.com/ga4gh/workflow-execution-service-schemas) compatible API server and the Web GUI.
 
 ![SAPPORO - Home](https://i.imgur.com/ebHAY8o.jpg)
 
-## What does "individual task execution system" mean?
-
-[Wikipedia - Batch Computing](https://en.wikipedia.org/wiki/Batch_processing)
-
-> the scripted running of one or more programs, as directed by Job Control Language, with no human interaction other than,
-
-Batch computing is used in the following various areas.
-
-- Machine learning
-- Genome analysis
-- Animation rendering
-- Software testing
-- Various simulations
-
-These batch jobs can be ensured portability and reproducibility by using container technologies (e.g. Docker, Kubernetes, etc.), workflow execution engines (e.g. Airflow, Luigi, etc.) and workflow description languages (e.g. CWL, WDL, etc.).
-
-![SAPPORO - Batch Job](https://i.imgur.com/4UJ799a.png)
-
-## What does "useful for continuous testing of workflows" mean?
-
-However, even if these technologies are used, since processing is executed on a physical computer, various practical problems occur.
-
-- The server is shut down
-- The network is shut down
-- CPU resources, memory, storage, etc. are occupied by other processes
-- A hosted container image is modified
-
-In order to deal with these problems, in SAPPORO, the concept of CI/CD is introduced for the management of batch jobs. In other words, SAPPORO is intended to test if "the batch jobs are executing correctly" and "is the output of the batch job always the same (reproducible)".
+[Documentation in Japanese](https://hackmd.io/s/Syq0q0o8N)
 
 ## Features
 
-- Verification of the reproducibility of a workflow
+- Easy to deploy with `docker-compose`
+  - Suitable for on-premise, local cluster, cloud
+- Workflow language and runner flexibility
+  - A wrapper [`run.sh`](https://github.com/ddbj/SAPPORO-service/blob/master/sapporo/run.sh) encapsulates the differences in languages/runners/job schedulers
+
+### Features work in progress
+
+- Compatibility with object storage servers
 - Collect and manage batch job results
-- Support for various workflow execution engines and workflow description languages
-- Cooperation with various job schedulers
-- Deployment to various environments (on-premise, cloud, cluster. etc.)
-- docker-compose for simple deployment and management
+- Verification of the reproducibility of a workflow
 
-## System Architecture
+## Architecture
 
-SAPPORO has two components: SAPPORO-web and SAPPORO-service.
+Sapporo has two components, Web and Service, which enable the cloud-friendly deployment. Sapporo-fileserver is also available for I/O testing.
 
-- SAPPORO-web
-  - User and batch job management interface
-  - Web Server
-- SAPPORO-service
-  - Batch job executor
-  - REST API Server
+- [SAPPORO-web](https://github.com/ddbj/SAPPORO-web)
+  - Simple web application to providev graphical interface to manage users, jobs, and servers
+- [SAPPORO-service](https://github.com/ddbj/SAPPORO-service)
+  - An REST API implementation of [GA4GH WES](https://github.com/ga4gh/workflow-execution-service-schemas)
+- [SAPPORO-fileserver](https://github.com/ddbj/SAPPORO-fileserver)
+  - A tiny wrapper for [minio](https://minio.io) server for testing workflow input/output
 
 ![SAPPORO - System Architecture](https://i.imgur.com/A4seI74.png)
 
-You can register multiple SAPPORO-service in one SAPPORO-web or register one SAPPORO-service in multiple SAPPORO-web.
-
-For details, please refer to each README.
+Users need to register Sapporo-service or other WES implementations to Sapporo-web to submit and manage workflows. Details of the components are in the documentation of each repository:
 
 - [SAPPORO-web - README](https://github.com/ddbj/SAPPORO-web/blob/master/README.md)
 - [SAPPORO-service - README](https://github.com/ddbj/SAPPORO-service/blob/master/README.md)
 - [SAPPORO-fileserver - README](https://github.com/ddbj/SAPPORO-fileserver/blob/master/README.md)
+
+## Aims and expectations
+
+### Individual task execution system
+
+From [Wikipedia - Batch Computing](https://en.wikipedia.org/wiki/Batch_processing):
+
+> the scripted running of one or more programs, as directed by Job Control Language, with no human interaction other than,
+
+Batch computing is a common technique used in the various fields of data engineering and science:
+
+- Animation rendering
+- Software testing
+- Machine learning
+- Genomic data analysis
+- Simulations
+
+Batch jobs usually have problems on portability and reproducibility, because many are implemented for a specific computing environment such as local computing clusters. Sapporo aims to support technologies such as container virtualization (e.g. Docker, Singularity, etc.), or workflow runners (e.g. Airflow, Luigi, etc.), and workflow languages ([Common Workflow Language](https://www.commonwl.org/), [Workflow Description Language](https://github.com/openwdl/wdl), [Nextflow](https://www.nextflow.io/), [Snakemake](https://snakemake.github.io/), etc.).
+
+![SAPPORO - Batch Job](https://i.imgur.com/4UJ799a.png)
+
+## Continuous testing of workflows
+
+Packaging software in containers and describing processes in workflow languages are powerful methods to improve portability. However, there are still problems to prevent workflow execution like:
+
+- Server down
+- Network down
+- Other processes occupies resources such as CPU, memory, or storage
+- Unexpected modification of container images
+
+Sapporo aims to introduce the continuous integration (CI) / continous deployment (CD) concept to the management of batch job execution. Testing batch job with WES can make sure that the registered batch job is running correctly, or failed at some point.
 
 ## License
 
